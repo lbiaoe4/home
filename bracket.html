@@ -482,58 +482,73 @@
       return nodes; // importante pro desenho dos wires
     }
 
-    function drawWires(nodes){
-      wires.innerHTML = "";
-      wires.setAttribute("viewBox", `0 0 ${bracket.clientWidth} ${bracket.clientHeight}`);
+function drawWires(nodes){
+  wires.innerHTML = "";
 
-      const stageRect = bracket.getBoundingClientRect();
+  // pega o scale real do CSS (ex: 0.80)
+  const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--uiScale")) || 1;
 
-      function centerPoint(el, side){
-        const r = el.getBoundingClientRect();
-        const x = (side === "left") ? (r.left - stageRect.left) : (r.right - stageRect.left);
-        const y = (r.top - stageRect.top) + (r.height/2);
-        return {x,y};
-      }
+  // viewBox no espaço "lógico" (não escalado)
+  wires.setAttribute("viewBox", `0 0 ${bracket.clientWidth} ${bracket.clientHeight}`);
 
-      const stroke = "rgba(11,18,32,.20)";
-      const stroke2 = "rgba(11,18,32,.12)";
+  const bracketRect = bracket.getBoundingClientRect();
 
-      for (let r=1; r<5; r++){
-        for (let i=0;i<nodes[r].length;i++){
-          const parent = nodes[r][i];
-          const child1 = nodes[r-1][i*2];
-          const child2 = nodes[r-1][i*2+1];
+  function centerPoint(el, side){
+    const r = el.getBoundingClientRect();
 
-          const pL = centerPoint(parent, "left");
-          const c1R = centerPoint(child1, "right");
-          const c2R = centerPoint(child2, "right");
+    // coordenadas VISUAIS -> converte para coordenadas "lógicas" (divide pelo scale)
+    const xVisual = (side === "left")
+      ? (r.left - bracketRect.left)
+      : (r.right - bracketRect.left);
 
-          const midX = (c1R.x + pL.x) / 2;
+    const yVisual = (r.top - bracketRect.top) + (r.height / 2);
 
-          const d = `M ${c1R.x} ${c1R.y} L ${midX} ${c1R.y} L ${midX} ${c2R.y} L ${c2R.x} ${c2R.y}`;
-          const d2 = `M ${midX} ${(c1R.y+c2R.y)/2} L ${pL.x} ${pL.y}`;
+    return {
+      x: xVisual / scale,
+      y: yVisual / scale
+    };
+  }
 
-          const path = document.createElementNS("http://www.w3.org/2000/svg","path");
-          path.setAttribute("d", d);
-          path.setAttribute("fill","none");
-          path.setAttribute("stroke", stroke2);
-          path.setAttribute("stroke-width","2");
-          path.setAttribute("stroke-linecap","round");
-          path.setAttribute("stroke-linejoin","round");
+  const stroke  = "rgba(11,18,32,.20)";
+  const stroke2 = "rgba(11,18,32,.12)";
 
-          const path2 = document.createElementNS("http://www.w3.org/2000/svg","path");
-          path2.setAttribute("d", d2);
-          path2.setAttribute("fill","none");
-          path2.setAttribute("stroke", stroke);
-          path2.setAttribute("stroke-width","2");
-          path2.setAttribute("stroke-linecap","round");
-          path2.setAttribute("stroke-linejoin","round");
+  for (let r=1; r<5; r++){
+    for (let i=0;i<nodes[r].length;i++){
+      const parent = nodes[r][i];
+      const child1 = nodes[r-1][i*2];
+      const child2 = nodes[r-1][i*2+1];
 
-          wires.appendChild(path);
-          wires.appendChild(path2);
-        }
-      }
+      const pL  = centerPoint(parent, "left");
+      const c1R = centerPoint(child1, "right");
+      const c2R = centerPoint(child2, "right");
+
+      const midX = (c1R.x + pL.x) / 2;
+
+      const d  = `M ${c1R.x} ${c1R.y} L ${midX} ${c1R.y} L ${midX} ${c2R.y} L ${c2R.x} ${c2R.y}`;
+      const d2 = `M ${midX} ${(c1R.y+c2R.y)/2} L ${pL.x} ${pL.y}`;
+
+      const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+      path.setAttribute("d", d);
+      path.setAttribute("fill","none");
+      path.setAttribute("stroke", stroke2);
+      path.setAttribute("stroke-width","2");
+      path.setAttribute("stroke-linecap","round");
+      path.setAttribute("stroke-linejoin","round");
+
+      const path2 = document.createElementNS("http://www.w3.org/2000/svg","path");
+      path2.setAttribute("d", d2);
+      path2.setAttribute("fill","none");
+      path2.setAttribute("stroke", stroke);
+      path2.setAttribute("stroke-width","2");
+      path2.setAttribute("stroke-linecap","round");
+      path2.setAttribute("stroke-linejoin","round");
+
+      wires.appendChild(path);
+      wires.appendChild(path2);
     }
+  }
+}
+
 
     async function loadAndRender(){
       try{
@@ -581,3 +596,4 @@
   </script>
 </body>
 </html>
+
