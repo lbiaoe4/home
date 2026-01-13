@@ -554,56 +554,74 @@
       });
     }
 
-    function layout(rounds){
-      roundsEls.forEach(r => [...r.querySelectorAll(".match")].forEach(n => n.remove()));
-      wires.innerHTML = "";
+function layout(rounds){
+  roundsEls.forEach(r => [...r.querySelectorAll(".match")].forEach(n => n.remove()));
+  wires.innerHTML = "";
 
-      const css = getComputedStyle(document.documentElement);
-      const colW = parseFloat(css.getPropertyValue("--colW"));
-      const boxH = parseFloat(css.getPropertyValue("--boxH"));
-      const gapR1 = parseFloat(css.getPropertyValue("--gapR1"));
+  const css = getComputedStyle(document.documentElement);
+  const colW  = parseFloat(css.getPropertyValue("--colW"));
+  const boxH  = parseFloat(css.getPropertyValue("--boxH"));
+  const gapR1 = parseFloat(css.getPropertyValue("--gapR1"));
 
-      const padX = 14;
-      const topY = 14 + 26;
-      const usableH = bracket.clientHeight - 14 - 12 - 26 - 20;
+  const padX = 14;
+  const topY = 14 + 26; // topo + área do título da coluna
+  const usableH = bracket.clientHeight - 14 - 12 - 26 - 20;
 
-      const totalW = (colW * 5) + (36 * 4);
-      const startX = Math.max(padX, (bracket.clientWidth - totalW)/2);
-      const gapX = 36;
+  // posicionamento horizontal das colunas
+  const totalW = (colW * 5) + (36 * 4);
+  const startX = Math.max(padX, (bracket.clientWidth - totalW)/2);
+  const gapX = 36;
 
-      roundsEls.forEach((col, i)=>{
-        col.style.left = (startX + i*(colW+gapX)) + "px";
-      });
+  roundsEls.forEach((col, i)=>{
+    col.style.left = (startX + i*(colW+gapX)) + "px";
+  });
 
-      const r1Count = rounds[0].length;
-      const r1Total = (r1Count * boxH) + ((r1Count - 1) * gapR1);
-      const baseY = Math.max(topY, topY + (usableH - r1Total)/2);
+  // Round 1: empilha e centraliza verticalmente
+  const r1Count = rounds[0].length;
+  const r1Total = (r1Count * boxH) + ((r1Count - 1) * gapR1);
+  const baseY = Math.max(topY, topY + (usableH - r1Total)/2);
 
-      const nodes = [[],[],[],[],[]];
+  // guarda centros Y por round (para calcular rounds seguintes)
+  const centers = [[],[],[],[],[]];
+  const nodes   = [[],[],[],[],[]];
 
-      for (let i=0;i<r1Count;i++){
-        const el = makeMatchEl(rounds[0][i]);
-        const y = baseY + i*(boxH+gapR1);
-        el.style.top = y + "px";
-        roundsEls[0].appendChild(el);
-        nodes[0].push(el);
-      }
+  // R1
+  for (let i=0; i<r1Count; i++){
+    const el = makeMatchEl(rounds[0][i]);
+    const y  = baseY + i*(boxH + gapR1);
+    el.style.top = y + "px";
+    roundsEls[0].appendChild(el);
 
-      for (let r=1; r<5; r++){
-        for (let i=0;i<rounds[r].length;i++){
-          const child1 = nodes[r-1][i*2];
-          const child2 = nodes[r-1][i*2+1];
-          const y = (((parseFloat(child1.style.top)||0) + (parseFloat(child2.style.top)||0)) / 2);
-          const boxHlocal = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--boxH"));
-          const el = makeMatchEl(rounds[r][i]);
-          el.style.top = (y) + "px";
-          roundsEls[r].appendChild(el);
-          nodes[r].push(el);
-        }
-      }
+    nodes[0].push(el);
+    centers[0].push(y + boxH/2); // ✅ centro
+  }
 
-      return nodes;
+  // R2..R5: cada match fica no meio dos dois “filhos”
+  for (let r=1; r<5; r++){
+    const count = rounds[r].length;
+
+    for (let i=0; i<count; i++){
+      const childA = centers[r-1][i*2];
+      const childB = centers[r-1][i*2 + 1];
+
+      // se faltar filho (ex: dados incompletos), cai num default seguro
+      const cy = (childA !== undefined && childB !== undefined)
+        ? (childA + childB)/2
+        : (centers[r-1][i] ?? (baseY + boxH/2));
+
+      const y = cy - boxH/2;
+
+      const el = makeMatchEl(rounds[r][i]);
+      el.style.top = y + "px";
+      roundsEls[r].appendChild(el);
+
+      nodes[r].push(el);
+      centers[r].push(cy);
     }
+  }
+
+  return nodes;
+}
 
     // SVG wires corrigidos pro SCALE (zoom 80%) + pular BYE
     function drawWires(nodes){
@@ -712,3 +730,4 @@
   </script>
 </body>
 </html>
+
