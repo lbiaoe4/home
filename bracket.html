@@ -217,33 +217,33 @@
     .warn{ color: #b45309; font-weight:900; }
 
     /* Tooltip do draft (imagem) */
-    .draftTip{
-      position:absolute;
-      left: 12px;
-      top: calc(100% + 10px);
-      z-index: 50;
-      width: 340px;
-      max-width: 52vw;
-      padding: 10px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.96);
-      box-shadow: 0 18px 40px rgba(11,18,32,.16);
-      display:none;
-    }
-    .draftTip img{
-      width:100%;
-      height:auto;
-      display:block;
-      border-radius: 10px;
-      border: 1px solid var(--line2);
-    }
-    .draftTip .cap{
-      margin-top:8px;
-      font-size:11px;
-      color: var(--muted);
-      font-weight:900;
-    }
+   .draftTip{
+  position:absolute;
+  left: 12px;
+  top: calc(100% + 10px);
+  z-index: 50;
+
+  width: 800px;          /* ✅ tamanho pedido */
+  max-width: 85vw;       /* ✅ não estoura a tela */
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 18px 40px rgba(11,18,32,.16);
+  display:none;
+}
+
+.draftTip img{
+  width:100%;
+  height:auto;
+  display:block;
+  border-radius: 12px;
+  border: 1px solid var(--line2);
+}
+
+/* ✅ remove legenda/texto */
+.draftTip .cap{ display:none; }
+
     .draftBtn{
       cursor:pointer;
       font-size:11px;
@@ -522,7 +522,6 @@
         ${hasImg ? `
           <div class="draftTip">
             <img src="${img}" alt="Draft da partida" loading="lazy" />
-            <div class="cap">Draft</div>
           </div>
         ` : ``}
       `;
@@ -574,20 +573,46 @@
         centers[0].push(y + boxH/2);
       }
 
-      for (let r=1; r<5; r++){
-        for (let i=0;i<rounds[r].length;i++){
-          const childA = centers[r-1][i*2];
-          const childB = centers[r-1][i*2+1];
-          const cy = (childA + childB)/2;
-          const y = cy - boxH/2;
+for (let r=1; r<5; r++){
+  for (let i=0;i<nodes[r].length;i++){
+    const parent = nodes[r][i];
+    const child1 = nodes[r-1][i*2];
+    const child2 = nodes[r-1][i*2+1];
 
-          const el = makeMatchEl(rounds[r][i]);
-          el.style.top = y + "px";
-          roundsEls[r].appendChild(el);
-          nodes[r].push(el);
-          centers[r].push(cy);
-        }
-      }
+    // ✅ se algum “filho” é BYE (pill escondida), não desenha os conectores desse par
+    if (!child1 || !child2) continue;
+    if (child1.classList.contains("isBye") || child2.classList.contains("isBye")) continue;
+
+    const pL  = centerPoint(parent, "left");
+    const c1R = centerPoint(child1, "right");
+    const c2R = centerPoint(child2, "right");
+
+    const midX = (c1R.x + pL.x) / 2;
+
+    const d  = `M ${c1R.x} ${c1R.y} L ${midX} ${c1R.y} L ${midX} ${c2R.y} L ${c2R.x} ${c2R.y}`;
+    const d2 = `M ${midX} ${(c1R.y+c2R.y)/2} L ${pL.x} ${pL.y}`;
+
+    const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+    path.setAttribute("d", d);
+    path.setAttribute("fill","none");
+    path.setAttribute("stroke", stroke2);
+    path.setAttribute("stroke-width","2");
+    path.setAttribute("stroke-linecap","round");
+    path.setAttribute("stroke-linejoin","round");
+
+    const path2 = document.createElementNS("http://www.w3.org/2000/svg","path");
+    path2.setAttribute("d", d2);
+    path2.setAttribute("fill","none");
+    path2.setAttribute("stroke", stroke);
+    path2.setAttribute("stroke-width","2");
+    path2.setAttribute("stroke-linecap","round");
+    path2.setAttribute("stroke-linejoin","round");
+
+    wires.appendChild(path);
+    wires.appendChild(path2);
+  }
+}
+
 
       return nodes;
     }
@@ -694,3 +719,4 @@
   </script>
 </body>
 </html>
+
