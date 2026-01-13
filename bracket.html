@@ -624,64 +624,108 @@ function layout(rounds){
 }
 
     // SVG wires corrigidos pro SCALE (zoom 80%) + pular BYE
-    function drawWires(nodes){
-      wires.innerHTML = "";
+function drawWires(nodes){
+  wires.innerHTML = "";
 
-      const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--uiScale")) || 1;
-      wires.setAttribute("viewBox", `0 0 ${bracket.clientWidth} ${bracket.clientHeight}`);
+  const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--uiScale")) || 1;
+  wires.setAttribute("viewBox", `0 0 ${bracket.clientWidth} ${bracket.clientHeight}`);
 
-      const bracketRect = bracket.getBoundingClientRect();
+  const bracketRect = bracket.getBoundingClientRect();
 
-      function centerPoint(el, side){
-        const r = el.getBoundingClientRect();
-        const xVisual = (side === "left") ? (r.left - bracketRect.left) : (r.right - bracketRect.left);
-        const yVisual = (r.top - bracketRect.top) + (r.height/2);
-        return { x: xVisual / scale, y: yVisual / scale };
+  function centerPoint(el, side){
+    const r = el.getBoundingClientRect();
+    const xVisual = (side === "left") ? (r.left - bracketRect.left) : (r.right - bracketRect.left);
+    const yVisual = (r.top - bracketRect.top) + (r.height/2);
+    return { x: xVisual / scale, y: yVisual / scale };
+  }
+
+  const stroke  = "rgba(11,18,32,.20)";
+  const stroke2 = "rgba(11,18,32,.12)";
+
+  // desenha o “H” normal (dois filhos)
+  function drawPair(child1, child2, parent){
+    const pL  = centerPoint(parent, "left");
+    const c1R = centerPoint(child1, "right");
+    const c2R = centerPoint(child2, "right");
+
+    const midX = (c1R.x + pL.x) / 2;
+
+    const d  = `M ${c1R.x} ${c1R.y} L ${midX} ${c1R.y} L ${midX} ${c2R.y} L ${c2R.x} ${c2R.y}`;
+    const d2 = `M ${midX} ${(c1R.y+c2R.y)/2} L ${pL.x} ${pL.y}`;
+
+    const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+    path.setAttribute("d", d);
+    path.setAttribute("fill","none");
+    path.setAttribute("stroke", stroke2);
+    path.setAttribute("stroke-width","2");
+    path.setAttribute("stroke-linecap","round");
+    path.setAttribute("stroke-linejoin","round");
+
+    const path2 = document.createElementNS("http://www.w3.org/2000/svg","path");
+    path2.setAttribute("d", d2);
+    path2.setAttribute("fill","none");
+    path2.setAttribute("stroke", stroke);
+    path2.setAttribute("stroke-width","2");
+    path2.setAttribute("stroke-linecap","round");
+    path2.setAttribute("stroke-linejoin","round");
+
+    wires.appendChild(path);
+    wires.appendChild(path2);
+  }
+
+  // desenha linha simples (só 1 filho)
+  function drawSingle(child, parent){
+    const pL = centerPoint(parent, "left");
+    const cR = centerPoint(child, "right");
+
+    const midX = (cR.x + pL.x) / 2;
+
+    // child -> midX -> parent
+    const d = `M ${cR.x} ${cR.y} L ${midX} ${cR.y} L ${midX} ${pL.y} L ${pL.x} ${pL.y}`;
+
+    const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+    path.setAttribute("d", d);
+    path.setAttribute("fill","none");
+    path.setAttribute("stroke", stroke);
+    path.setAttribute("stroke-width","2");
+    path.setAttribute("stroke-linecap","round");
+    path.setAttribute("stroke-linejoin","round");
+
+    wires.appendChild(path);
+  }
+
+  for (let r=1; r<5; r++){
+    for (let i=0; i<nodes[r].length; i++){
+      const parent = nodes[r][i];
+      const child1 = nodes[r-1][i*2];
+      const child2 = nodes[r-1][i*2+1];
+
+      // se o pai não existir, ignora
+      if (!parent) continue;
+
+      // filtra filhos inválidos / BYE
+      const valid1 = child1 && !child1.classList.contains("isBye");
+      const valid2 = child2 && !child2.classList.contains("isBye");
+
+      // 2 filhos válidos -> normal
+      if (valid1 && valid2){
+        drawPair(child1, child2, parent);
+        continue;
       }
 
-      const stroke  = "rgba(11,18,32,.20)";
-      const stroke2 = "rgba(11,18,32,.12)";
-
-      for (let r=1; r<5; r++){
-        for (let i=0;i<nodes[r].length;i++){
-          const parent = nodes[r][i];
-          const child1 = nodes[r-1][i*2];
-          const child2 = nodes[r-1][i*2+1];
-
-          // ✅ se algum “filho” é BYE (pill escondida), não desenha conectores desse par
-          if (!child1 || !child2) continue;
-          if (child1.classList.contains("isBye") || child2.classList.contains("isBye")) continue;
-
-          const pL  = centerPoint(parent, "left");
-          const c1R = centerPoint(child1, "right");
-          const c2R = centerPoint(child2, "right");
-
-          const midX = (c1R.x + pL.x) / 2;
-
-          const d  = `M ${c1R.x} ${c1R.y} L ${midX} ${c1R.y} L ${midX} ${c2R.y} L ${c2R.x} ${c2R.y}`;
-          const d2 = `M ${midX} ${(c1R.y+c2R.y)/2} L ${pL.x} ${pL.y}`;
-
-          const path = document.createElementNS("http://www.w3.org/2000/svg","path");
-          path.setAttribute("d", d);
-          path.setAttribute("fill","none");
-          path.setAttribute("stroke", stroke2);
-          path.setAttribute("stroke-width","2");
-          path.setAttribute("stroke-linecap","round");
-          path.setAttribute("stroke-linejoin","round");
-
-          const path2 = document.createElementNS("http://www.w3.org/2000/svg","path");
-          path2.setAttribute("d", d2);
-          path2.setAttribute("fill","none");
-          path2.setAttribute("stroke", stroke);
-          path2.setAttribute("stroke-width","2");
-          path2.setAttribute("stroke-linecap","round");
-          path2.setAttribute("stroke-linejoin","round");
-
-          wires.appendChild(path);
-          wires.appendChild(path2);
-        }
+      // só 1 válido -> linha simples
+      if (valid1 && !valid2){
+        drawSingle(child1, parent);
+        continue;
       }
+      if (!valid1 && valid2){
+        drawSingle(child2, parent);
+        continue;
+      }
+
     }
+  }
+}
 
     async function loadAndRender(){
       try{
@@ -730,4 +774,5 @@ function layout(rounds){
   </script>
 </body>
 </html>
+
 
