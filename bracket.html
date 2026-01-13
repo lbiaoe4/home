@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bracket 32 Seeds (R1–R5)</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#0f1833;
+      --panel2:#0c142c;
+      --ink:#eaf0ff;
+      --muted:rgba(234,240,255,.72);
+      --line:rgba(234,240,255,.12);
+      --win:#2ecc71;
+      --lose:#ff5c7a;
+      --warn:#ffcc66;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(66,135,245,.25), transparent 55%),
+                  radial-gradient(1000px 600px at 90% 30%, rgba(130,87,229,.22), transparent 60%),
+                  var(--bg);
+      color:var(--ink);
+      overflow:hidden; /* fullHD 1 tela */
+    }
+
+    header{
+      height:64px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 18px;
+      border-bottom:1px solid var(--line);
+      background: linear-gradient(to bottom, rgba(15,24,51,.75), rgba(15,24,51,.30));
+      backdrop-filter: blur(10px);
+    }
+    .title{
+      display:flex; gap:10px; align-items:center;
+      font-weight:800; letter-spacing:.3px;
+    }
+    .badge{
+      font-size:12px;
+      padding:4px 10px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      color:var(--muted);
+      background: rgba(255,255,255,.04);
+    }
+    .meta{
+      display:flex; gap:10px; align-items:center; color:var(--muted); font-size:12px;
+    }
+    .btn{
+      cursor:pointer;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color:var(--ink);
+      padding:8px 12px;
+      border-radius:12px;
+      font-weight:700;
+    }
+    .btn:hover{ background: rgba(255,255,255,.08); }
+
+    main{
+      height: calc(100% - 64px);
+      padding: 14px;
+    }
+
+    /* 5 colunas, tudo na tela fullHD */
+    .grid{
+      height:100%;
+      display:grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap:12px;
+      align-items:stretch;
+    }
+
+    .col{
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+    }
+    .col h2{
+      margin:0;
+      padding:12px 12px 10px;
+      font-size:14px;
+      font-weight:900;
+      letter-spacing:.4px;
+      border-bottom:1px solid var(--line);
+      background: linear-gradient(to bottom, rgba(12,20,44,.70), rgba(12,20,44,.18));
+    }
+    .list{
+      padding:10px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      overflow:hidden;
+    }
+
+    .match{
+      border:1px solid var(--line);
+      border-radius:16px;
+      background: linear-gradient(to bottom, rgba(15,24,51,.70), rgba(15,24,51,.35));
+      padding:10px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      min-height:64px;
+    }
+    .toprow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      color:var(--muted);
+      font-size:11px;
+    }
+    .idchip{
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      font-weight:800;
+      color:var(--ink);
+      font-size:11px;
+    }
+
+    .rows{
+      display:grid;
+      grid-template-rows: 1fr 1fr;
+      gap:6px;
+    }
+    .team{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid rgba(234,240,255,.10);
+      background: rgba(0,0,0,.12);
+      font-weight:800;
+      min-width:0;
+    }
+    .name{
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .score{
+      font-variant-numeric: tabular-nums;
+      opacity:.95;
+    }
+
+    .win{
+      border-color: rgba(46,204,113,.45);
+      background: rgba(46,204,113,.10);
+      box-shadow: 0 0 0 1px rgba(46,204,113,.14) inset;
+    }
+    .lose{
+      border-color: rgba(255,92,122,.35);
+      background: rgba(255,92,122,.08);
+    }
+
+    .foot{
+      margin-top:auto;
+      padding:10px 12px;
+      border-top:1px solid var(--line);
+      color:var(--muted);
+      font-size:11px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .status-warn{ color: var(--warn); font-weight:800; }
+
+    /* Ajuste visual pra caber melhor no fullHD */
+    @media (max-width: 1400px){
+      header{height:56px}
+      main{height: calc(100% - 56px)}
+      .match{padding:9px}
+      .team{padding:7px 9px}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">
+      <span>IMBR : BRACKET</span>
+      <span class="badge">32 seeds • R1–R5</span>
+    </div>
+    <div class="meta">
+      <span id="last">Carregando…</span>
+      <button class="btn" id="reload">Atualizar</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid">
+      <section class="col">
+        <h2>Rodada 1 (32 → 16)</h2>
+        <div class="list" id="r1"></div>
+        <div class="foot"><span>Linhas 2–17</span><span id="s1"></span></div>
+      </section>
+
+      <section class="col">
+        <h2>Rodada 2 (16 → 8)</h2>
+        <div class="list" id="r2"></div>
+        <div class="foot"><span>Linhas 18–25</span><span id="s2"></span></div>
+      </section>
+
+      <section class="col">
+        <h2>Rodada 3 (8 → 4)</h2>
+        <div class="list" id="r3"></div>
+        <div class="foot"><span>Linhas 26–29</span><span id="s3"></span></div>
+      </section>
+
+      <section class="col">
+        <h2>Rodada 4 (4 → 2)</h2>
+        <div class="list" id="r4"></div>
+        <div class="foot"><span>Linhas 30–31</span><span id="s4"></span></div>
+      </section>
+
+      <section class="col">
+        <h2>Rodada 5 (Final)</h2>
+        <div class="list" id="r5"></div>
+        <div class="foot"><span>Linha 32</span><span id="s5"></span></div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // ✅ Seu link publicado (pubhtml) — deixei o mesmo que você enviou:
+    const PUBHTML_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTihzZmyAJhTVjALmuX1R1YTGyuW0p-5umWppci2rQVRMJ5h1m2IrkZo4wi4MUN_fZ03vxu2vwFT2ob/pubhtml?gid=1150926553&single=true";
+
+    // Tenta CSV primeiro (mais fácil de parsear). Se CORS bloquear, cai pro parse do pubhtml.
+    const CSV_URL = PUBHTML_URL
+      .replace("/pubhtml", "/pub")
+      .replace(/(\?|&)single=true/g, "")
+      + "&output=csv&single=true";
+
+    // Mapeamento por LINHA da planilha:
+    // Linha 1 = cabeçalho
+    // Linhas 2-17 = R1 (16)
+    // 18-25 = R2 (8)
+    // 26-29 = R3 (4)
+    // 30-31 = R4 (2)  ← (se você realmente estiver usando 30 e 32, me diga e eu ajusto)
+    // 32 = R5 (1)
+    const ranges = {
+      r1: [0, 15],   // rows array (0 = linha 2)
+      r2: [16, 23],
+      r3: [24, 27],
+      r4: [28, 29],
+      r5: [30, 30],
+    };
+
+    const els = {
+      r1: document.getElementById("r1"),
+      r2: document.getElementById("r2"),
+      r3: document.getElementById("r3"),
+      r4: document.getElementById("r4"),
+      r5: document.getElementById("r5"),
+      last: document.getElementById("last"),
+      s1: document.getElementById("s1"),
+      s2: document.getElementById("s2"),
+      s3: document.getElementById("s3"),
+      s4: document.getElementById("s4"),
+      s5: document.getElementById("s5"),
+    };
+
+    function nowStr(){
+      const d = new Date();
+      return d.toLocaleString("pt-BR", { hour12:false });
+    }
+
+    function escapeHtml(s){
+      return String(s ?? "").replace(/[&<>"']/g, m => (
+        {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]
+      ));
+    }
+
+    function parseCSV(text){
+      // Parser simples de CSV (suporta aspas)
+      const rows = [];
+      let cur = [], field = "", inQuotes = false;
+
+      for (let i=0; i<text.length; i++){
+        const c = text[i];
+        const next = text[i+1];
+
+        if (c === '"' ){
+          if (inQuotes && next === '"'){ field += '"'; i++; }
+          else inQuotes = !inQuotes;
+        } else if (c === ',' && !inQuotes){
+          cur.push(field); field = "";
+        } else if ((c === '\n' || c === '\r') && !inQuotes){
+          if (c === '\r' && next === '\n') i++;
+          cur.push(field);
+          rows.push(cur);
+          cur = []; field = "";
+        } else {
+          field += c;
+        }
+      }
+      if (field.length || cur.length){
+        cur.push(field);
+        rows.push(cur);
+      }
+      return rows.filter(r => r.some(x => String(x).trim() !== ""));
+    }
+
+    function normalizeHeaders(headerRow){
+      const map = {};
+      headerRow.forEach((h, idx) => {
+        const key = String(h).trim().toLowerCase();
+        map[key] = idx;
+      });
+
+      // aceita variações (ex: "pos" no lugar de "id")
+      const idx = (name, fallbackNames=[]) => {
+        if (map[name] !== undefined) return map[name];
+        for (const f of fallbackNames){
+          if (map[f] !== undefined) return map[f];
+        }
+        return -1;
+      };
+
+      return {
+        id: idx("id", ["pos"]),
+        type: idx("type"),
+        p1: idx("player1"),
+        p2: idx("player2"),
+        draft: idx("draft"),
+        s1: idx("score1"),
+        s2: idx("score2"),
+        winner: idx("winner"),
+      };
+    }
+
+    function card(match){
+      const id = escapeHtml(match.id || "");
+      const type = escapeHtml(match.type || "");
+      const draft = escapeHtml(match.draft || "");
+      const p1 = escapeHtml(match.player1 || "");
+      const p2 = escapeHtml(match.player2 || "");
+      const sc1 = escapeHtml(match.score1 || "");
+      const sc2 = escapeHtml(match.score2 || "");
+      const w = String(match.winner || "").trim();
+
+      const p1Win = w && w === String(match.player1 || "").trim();
+      const p2Win = w && w === String(match.player2 || "").trim();
+
+      return `
+        <div class="match">
+          <div class="toprow">
+            <span class="idchip">${id || "—"}</span>
+            <span>${type || ""}${draft ? " • " + draft : ""}</span>
+          </div>
+          <div class="rows">
+            <div class="team ${p1Win ? "win" : (w ? "lose" : "")}">
+              <span class="name">${p1 || "—"}</span>
+              <span class="score">${sc1 !== "" ? sc1 : " "}</span>
+            </div>
+            <div class="team ${p2Win ? "win" : (w ? "lose" : "")}">
+              <span class="name">${p2 || "—"}</span>
+              <span class="score">${sc2 !== "" ? sc2 : " "}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function sliceRange(rows, a, b){
+      return rows.slice(a, b + 1);
+    }
+
+    function countFinished(rows){
+      let done = 0;
+      for (const r of rows){
+        if (String(r.winner || "").trim()) done++;
+      }
+      return done;
+    }
+
+    function render(allMatches){
+      const r1 = sliceRange(allMatches, ...ranges.r1);
+      const r2 = sliceRange(allMatches, ...ranges.r2);
+      const r3 = sliceRange(allMatches, ...ranges.r3);
+      const r4 = sliceRange(allMatches, ...ranges.r4);
+      const r5 = sliceRange(allMatches, ...ranges.r5);
+
+      els.r1.innerHTML = r1.map(card).join("");
+      els.r2.innerHTML = r2.map(card).join("");
+      els.r3.innerHTML = r3.map(card).join("");
+      els.r4.innerHTML = r4.map(card).join("");
+      els.r5.innerHTML = r5.map(card).join("");
+
+      els.s1.textContent = `${countFinished(r1)}/${r1.length} finalizadas`;
+      els.s2.textContent = `${countFinished(r2)}/${r2.length} finalizadas`;
+      els.s3.textContent = `${countFinished(r3)}/${r3.length} finalizadas`;
+      els.s4.textContent = `${countFinished(r4)}/${r4.length} finalizadas`;
+      els.s5.textContent = `${countFinished(r5)}/${r5.length} finalizadas`;
+
+      els.last.textContent = `Atualizado: ${nowStr()}`;
+    }
+
+    async function loadViaCSV(){
+      const res = await fetch(CSV_URL, { cache: "no-store" });
+      if (!res.ok) throw new Error("CSV fetch falhou");
+      const txt = await res.text();
+      const table = parseCSV(txt);
+      const header = table[0];
+      const H = normalizeHeaders(header);
+
+      const body = table.slice(1); // remove header
+      return body.map(row => ({
+        id: H.id >= 0 ? row[H.id] : "",
+        type: H.type >= 0 ? row[H.type] : "",
+        player1: H.p1 >= 0 ? row[H.p1] : "",
+        player2: H.p2 >= 0 ? row[H.p2] : "",
+        draft: H.draft >= 0 ? row[H.draft] : "",
+        score1: H.s1 >= 0 ? row[H.s1] : "",
+        score2: H.s2 >= 0 ? row[H.s2] : "",
+        winner: H.winner >= 0 ? row[H.winner] : "",
+      }));
+    }
+
+    async function loadViaPubHtml(){
+      const res = await fetch(PUBHTML_URL, { cache: "no-store" });
+      if (!res.ok) throw new Error("pubhtml fetch falhou");
+      const html = await res.text();
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const table = doc.querySelector("table");
+      if (!table) throw new Error("não achei tabela no pubhtml");
+
+      const rows = [...table.querySelectorAll("tr")].map(tr =>
+        [...tr.querySelectorAll("th,td")].map(td => td.textContent.trim())
+      ).filter(r => r.length);
+
+      const header = rows[0];
+      const H = normalizeHeaders(header);
+      const body = rows.slice(1);
+
+      return body.map(row => ({
+        id: H.id >= 0 ? row[H.id] : "",
+        type: H.type >= 0 ? row[H.type] : "",
+        player1: H.p1 >= 0 ? row[H.p1] : "",
+        player2: H.p2 >= 0 ? row[H.p2] : "",
+        draft: H.draft >= 0 ? row[H.draft] : "",
+        score1: H.s1 >= 0 ? row[H.s1] : "",
+        score2: H.s2 >= 0 ? row[H.s2] : "",
+        winner: H.winner >= 0 ? row[H.winner] : "",
+      }));
+    }
+
+    async function loadAndRender(){
+      // Mostra aviso se o tamanho vier diferente do esperado
+      const expected = 31; // 16+8+4+2+1
+      try{
+        const matches = await loadViaCSV();
+        if (matches.length < expected) {
+          els.last.innerHTML = `<span class="status-warn">Dados insuficientes (${matches.length}/${expected}). Verifique se a planilha publicada tem as 31 partidas.</span>`;
+        }
+        render(matches);
+        return;
+      }catch(e1){
+        // fallback: parse pubhtml
+        try{
+          const matches = await loadViaPubHtml();
+          if (matches.length < expected) {
+            els.last.innerHTML = `<span class="status-warn">Dados insuficientes (${matches.length}/${expected}). Verifique se a planilha publicada tem as 31 partidas.</span>`;
+          }
+          render(matches);
+          return;
+        }catch(e2){
+          els.last.innerHTML =
+            `<span class="status-warn">Não consegui ler a planilha via navegador (CORS). Se acontecer, publique também como CSV: Arquivo → Compartilhar → Publicar na Web → CSV.</span>`;
+          console.error(e1, e2);
+        }
+      }
+    }
+
+    document.getElementById("reload").addEventListener("click", loadAndRender);
+
+    // Auto refresh
+    loadAndRender();
+    setInterval(loadAndRender, 20000);
+  </script>
+</body>
+</html>
