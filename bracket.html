@@ -478,11 +478,50 @@
 
       return u;
     }
+    function advancerFromMatch(m){
+      // preferência: winner
+      const w = String(m.winner || "").trim();
+      if (w) return w;
+    
+      // fallback: se só tiver 1 player preenchido, ele avança
+      const p1 = String(m.player1 || "").trim();
+      const p2 = String(m.player2 || "").trim();
+      if (p1 && !p2) return p1;
+      if (!p1 && p2) return p2;
+    
+      return "";
+    }
+    
+    // preenche players de R2..R5 a partir dos winners de R1..R4
+    function propagateRounds(rounds){
+      for (let r = 1; r < rounds.length; r++){
+        for (let i = 0; i < rounds[r].length; i++){
+          const a = rounds[r-1][i*2];
+          const b = rounds[r-1][i*2 + 1];
+    
+          const pa = a ? advancerFromMatch(a) : "";
+          const pb = b ? advancerFromMatch(b) : "";
+    
+          // só sobrescreve se ainda estiver vazio na planilha
+          if (!String(rounds[r][i].player1 || "").trim() && pa) rounds[r][i].player1 = pa;
+          if (!String(rounds[r][i].player2 || "").trim() && pb) rounds[r][i].player2 = pb;
+    
+          // se o match inteiro continuar vazio depois disso, marca como "isBye" pra sumir no site
+          const p1 = String(rounds[r][i].player1 || "").trim();
+          const p2 = String(rounds[r][i].player2 || "").trim();
+          if (!p1 && !p2){
+            rounds[r][i]._ghost = true; // flag interno
+          }
+        }
+      }
+      return rounds;
+    }
 
     function makeMatchEl(m){
       const el = document.createElement("div");
       el.className = "match";
       el.dataset.id = String(m.id||"").trim();
+      if (m._ghost) el.classList.add("isBye");
 
       // BYE ou vazio: some a pill inteira, mas mantém espaço/posição
       if (isBye(m) || isEmptyMatch(m)) el.classList.add("isBye");
@@ -743,13 +782,16 @@ function drawWires(nodes){
           hint.textContent = `Fonte: planilha publicada • ${expectedMatches} partidas`;
         }
 
-        const r1 = padTo(sliceMatches(all, ...ranges.r1), 16);
-        const r2 = padTo(sliceMatches(all, ...ranges.r2), 8);
-        const r3 = padTo(sliceMatches(all, ...ranges.r3), 4);
-        const r4 = padTo(sliceMatches(all, ...ranges.r4), 2);
-        const r5 = padTo(sliceMatches(all, ...ranges.r5), 1);
+const r1 = padTo(sliceMatches(all, ...ranges.r1), 16);
+const r2 = padTo(sliceMatches(all, ...ranges.r2), 8);
+const r3 = padTo(sliceMatches(all, ...ranges.r3), 4);
+const r4 = padTo(sliceMatches(all, ...ranges.r4), 2);
+const r5 = padTo(sliceMatches(all, ...ranges.r5), 1);
 
-        const nodes = layout([r1,r2,r3,r4,r5]);
+const rounds = propagateRounds([r1,r2,r3,r4,r5]);
+
+const nodes = layout(rounds);
+
 
         // desenha wires depois do layout estabilizar
         requestAnimationFrame(() => {
@@ -780,6 +822,7 @@ function drawWires(nodes){
   </script>
 </body>
 </html>
+
 
 
 
