@@ -216,33 +216,31 @@
     }
     .warn{ color: #b45309; font-weight:900; }
 
-    /* Tooltip do draft (imagem) */
-   .draftTip{
-  position:absolute;
-  left: 12px;
-  top: calc(100% + 10px);
-  z-index: 50;
+    /* Tooltip do draft (imagem) – abre pro lado */
+    .draftTip{
+      position:absolute;
+      top: 50%;
+      left: calc(100% + 14px);
+      transform: translateY(-50%);
+      z-index: 80;
 
-  width: 800px;          /* ✅ tamanho pedido */
-  max-width: 85vw;       /* ✅ não estoura a tela */
-  padding: 10px;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,.96);
-  box-shadow: 0 18px 40px rgba(11,18,32,.16);
-  display:none;
-}
-
-.draftTip img{
-  width:100%;
-  height:auto;
-  display:block;
-  border-radius: 12px;
-  border: 1px solid var(--line2);
-}
-
-/* ✅ remove legenda/texto */
-.draftTip .cap{ display:none; }
+      width: 800px;
+      max-width: 85vw;
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.96);
+      box-shadow: 0 18px 40px rgba(11,18,32,.16);
+      display:none;
+    }
+    .draftTip img{
+      width:100%;
+      height:auto;
+      display:block;
+      border-radius: 12px;
+      border: 1px solid var(--line2);
+    }
+    .draftTip .cap{ display:none; }
 
     .draftBtn{
       cursor:pointer;
@@ -257,6 +255,12 @@
     }
     .draftBtn:hover{ background: rgba(0,0,0,.08); }
     .match.hasDraft:hover .draftTip{ display:block; }
+
+    /* flip automático para esquerda */
+    .match.tipLeft .draftTip{
+      left: auto;
+      right: calc(100% + 14px);
+    }
 
     @media (max-width: 1700px){
       :root{ --colW: 300px; --boxH: 50px; --gapR1: 10px; }
@@ -371,7 +375,7 @@
         s1: idx("score1"),
         s2: idx("score2"),
 
-        // NOVO: tenta achar por header; se não existir, cai no fallback "coluna F" (índice 5)
+        // tenta achar por header; se não existir, cai no fallback "coluna F" (índice 5)
         draft_img: idx("draft_img", ["draftimage","draft_image","image","img","link","draft_link"]),
 
         winner: idx("winner"),
@@ -459,10 +463,8 @@
     function normalizeImgUrl(url){
       const u = String(url||"").trim();
       if (!u) return "";
-      // Se já parece link direto de imagem, ok
       if (/\.(png|jpg|jpeg|webp|gif)(\?.*)?$/i.test(u)) return u;
 
-      // Alguns links do Google Drive: tenta converter "file/d/<id>/view" -> "uc?export=view&id=<id>"
       const m = u.match(/drive\.google\.com\/file\/d\/([^/]+)\//i);
       if (m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
 
@@ -474,7 +476,6 @@
       el.className = "match";
       el.dataset.id = String(m.id||"").trim();
 
-      // BYE: esconde a pill inteira, mas mantém espaço/posição
       if (isBye(m)) el.classList.add("isBye");
 
       const w = winnerOf(m);
@@ -487,8 +488,9 @@
 
       const chipText = (m.id || "—");
       const typeText = (m.type || "");
-      const draftText = String(m.draft||"").trim();
-      const rightTopBase = [typeText, draftText].filter(Boolean).join(" • ");
+
+      // ✅ não mostra o campo "draft" como texto (evita vazar URL na pill)
+      const rightTopBase = typeText || "";
 
       const img = normalizeImgUrl(m.draft_img);
       const hasImg = !!img;
@@ -536,6 +538,22 @@
       return arr;
     }
 
+    // decide se o tooltip vai pra esquerda quando faltar espaço
+    function applyTooltipFlip(){
+      const margin = 18;
+      document.querySelectorAll(".match.hasDraft").forEach(el => {
+        el.classList.remove("tipLeft");
+        const tip = el.querySelector(".draftTip");
+        if (!tip) return;
+
+        const r = el.getBoundingClientRect();
+        const spaceRight = window.innerWidth - r.right - margin;
+        const tipW = tip.offsetWidth || 800;
+
+        if (spaceRight < tipW) el.classList.add("tipLeft");
+      });
+    }
+
     function layout(rounds){
       roundsEls.forEach(r => [...r.querySelectorAll(".match")].forEach(n => n.remove()));
       wires.innerHTML = "";
@@ -561,7 +579,6 @@
       const r1Total = (r1Count * boxH) + ((r1Count - 1) * gapR1);
       const baseY = Math.max(topY, topY + (usableH - r1Total)/2);
 
-      const centers = [[],[],[],[],[]];
       const nodes = [[],[],[],[],[]];
 
       for (let i=0;i<r1Count;i++){
@@ -570,54 +587,25 @@
         el.style.top = y + "px";
         roundsEls[0].appendChild(el);
         nodes[0].push(el);
-        centers[0].push(y + boxH/2);
       }
 
-for (let r=1; r<5; r++){
-  for (let i=0;i<nodes[r].length;i++){
-    const parent = nodes[r][i];
-    const child1 = nodes[r-1][i*2];
-    const child2 = nodes[r-1][i*2+1];
-
-    // ✅ se algum “filho” é BYE (pill escondida), não desenha os conectores desse par
-    if (!child1 || !child2) continue;
-    if (child1.classList.contains("isBye") || child2.classList.contains("isBye")) continue;
-
-    const pL  = centerPoint(parent, "left");
-    const c1R = centerPoint(child1, "right");
-    const c2R = centerPoint(child2, "right");
-
-    const midX = (c1R.x + pL.x) / 2;
-
-    const d  = `M ${c1R.x} ${c1R.y} L ${midX} ${c1R.y} L ${midX} ${c2R.y} L ${c2R.x} ${c2R.y}`;
-    const d2 = `M ${midX} ${(c1R.y+c2R.y)/2} L ${pL.x} ${pL.y}`;
-
-    const path = document.createElementNS("http://www.w3.org/2000/svg","path");
-    path.setAttribute("d", d);
-    path.setAttribute("fill","none");
-    path.setAttribute("stroke", stroke2);
-    path.setAttribute("stroke-width","2");
-    path.setAttribute("stroke-linecap","round");
-    path.setAttribute("stroke-linejoin","round");
-
-    const path2 = document.createElementNS("http://www.w3.org/2000/svg","path");
-    path2.setAttribute("d", d2);
-    path2.setAttribute("fill","none");
-    path2.setAttribute("stroke", stroke);
-    path2.setAttribute("stroke-width","2");
-    path2.setAttribute("stroke-linecap","round");
-    path2.setAttribute("stroke-linejoin","round");
-
-    wires.appendChild(path);
-    wires.appendChild(path2);
-  }
-}
-
+      for (let r=1; r<5; r++){
+        for (let i=0;i<rounds[r].length;i++){
+          const child1 = nodes[r-1][i*2];
+          const child2 = nodes[r-1][i*2+1];
+          const y = (((parseFloat(child1.style.top)||0) + (parseFloat(child2.style.top)||0)) / 2);
+          const boxHlocal = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--boxH"));
+          const el = makeMatchEl(rounds[r][i]);
+          el.style.top = (y) + "px";
+          roundsEls[r].appendChild(el);
+          nodes[r].push(el);
+        }
+      }
 
       return nodes;
     }
 
-    // SVG wires corrigidos pro SCALE (zoom 80%)
+    // SVG wires corrigidos pro SCALE (zoom 80%) + pular BYE
     function drawWires(nodes){
       wires.innerHTML = "";
 
@@ -641,6 +629,10 @@ for (let r=1; r<5; r++){
           const parent = nodes[r][i];
           const child1 = nodes[r-1][i*2];
           const child2 = nodes[r-1][i*2+1];
+
+          // ✅ se algum “filho” é BYE (pill escondida), não desenha conectores desse par
+          if (!child1 || !child2) continue;
+          if (child1.classList.contains("isBye") || child2.classList.contains("isBye")) continue;
 
           const pL  = centerPoint(parent, "left");
           const c1R = centerPoint(child1, "right");
@@ -695,6 +687,7 @@ for (let r=1; r<5; r++){
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             drawWires(nodes);
+            applyTooltipFlip();
           });
         });
 
@@ -719,4 +712,3 @@ for (let r=1; r<5; r++){
   </script>
 </body>
 </html>
-
