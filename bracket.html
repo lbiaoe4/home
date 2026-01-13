@@ -217,23 +217,22 @@
     .warn{ color: #b45309; font-weight:900; }
 
     /* Tooltip do draft (imagem) – abre pro lado */
-.draftTip{
-  position:absolute;
-  left: calc(100% + 12px);   /* ✅ vai para o lado direito */
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 50;
+    .draftTip{
+      position:absolute;
+      top: 50%;
+      left: calc(100% + 14px);
+      transform: translateY(-50%);
+      z-index: 80;
 
-  width: 800px;
-  max-width: 85vw;
-  padding: 10px;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,.96);
-  box-shadow: 0 18px 40px rgba(11,18,32,.16);
-  display:none;
-}
-
+      width: 800px;
+      max-width: 85vw;
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.96);
+      box-shadow: 0 18px 40px rgba(11,18,32,.16);
+      display:none;
+    }
     .draftTip img{
       width:100%;
       height:auto;
@@ -460,13 +459,6 @@
       const s2 = parseInt(String(m.score2||"").trim(), 10);
       return (s1 === 99 && s2 === 0) || (s1 === 0 && s2 === 99);
     }
-    function isEmptyMatch(m){
-      const p1 = String(m.player1||"").trim();
-      const p2 = String(m.player2||"").trim();
-      const id = String(m.id||"").trim();
-      // considera vazio quando não tem players e nem id
-      return (!p1 && !p2 && !id);
-    }
 
     function normalizeImgUrl(url){
       const u = String(url||"").trim();
@@ -478,53 +470,13 @@
 
       return u;
     }
-    function advancerFromMatch(m){
-      // preferência: winner
-      const w = String(m.winner || "").trim();
-      if (w) return w;
-    
-      // fallback: se só tiver 1 player preenchido, ele avança
-      const p1 = String(m.player1 || "").trim();
-      const p2 = String(m.player2 || "").trim();
-      if (p1 && !p2) return p1;
-      if (!p1 && p2) return p2;
-    
-      return "";
-    }
-    
-    // preenche players de R2..R5 a partir dos winners de R1..R4
-    function propagateRounds(rounds){
-      for (let r = 1; r < rounds.length; r++){
-        for (let i = 0; i < rounds[r].length; i++){
-          const a = rounds[r-1][i*2];
-          const b = rounds[r-1][i*2 + 1];
-    
-          const pa = a ? advancerFromMatch(a) : "";
-          const pb = b ? advancerFromMatch(b) : "";
-    
-          // só sobrescreve se ainda estiver vazio na planilha
-          if (!String(rounds[r][i].player1 || "").trim() && pa) rounds[r][i].player1 = pa;
-          if (!String(rounds[r][i].player2 || "").trim() && pb) rounds[r][i].player2 = pb;
-    
-          // se o match inteiro continuar vazio depois disso, marca como "isBye" pra sumir no site
-          const p1 = String(rounds[r][i].player1 || "").trim();
-          const p2 = String(rounds[r][i].player2 || "").trim();
-          if (!p1 && !p2){
-            rounds[r][i]._ghost = true; // flag interno
-          }
-        }
-      }
-      return rounds;
-    }
 
     function makeMatchEl(m){
       const el = document.createElement("div");
       el.className = "match";
       el.dataset.id = String(m.id||"").trim();
-      if (m._ghost) el.classList.add("isBye");
 
-      // BYE ou vazio: some a pill inteira, mas mantém espaço/posição
-      if (isBye(m) || isEmptyMatch(m)) el.classList.add("isBye");
+      if (isBye(m)) el.classList.add("isBye");
 
       const w = winnerOf(m);
       const p1 = String(m.player1||"").trim();
@@ -549,29 +501,32 @@
         : "VS";
 
       el.innerHTML = `
-          <div class="m-top">
-            <span class="chip">${chipText}</span>
+        <div class="m-top">
+          <span class="chip">${chipText}</span>
+          <span style="display:flex; gap:8px; align-items:center;">
             <span>${rightTopBase}</span>
+            ${hasImg ? `<span class="draftBtn" title="Ver draft">Draft</span>` : ``}
+          </span>
+        </div>
+
+        <div class="m-body">
+          <div class="p" title="${p1}">
+            ${p1Win ? '<span class="winmark"></span>' : ''}
+            <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p1 || "—"}</span>
           </div>
-        
-          <div class="m-body">
-            <div class="p" title="${p1}">
-              ${p1Win ? '<span class="winmark"></span>' : ''}
-              <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p1 || "—"}</span>
-            </div>
-            <div class="vs">${scoreShown}</div>
-            <div class="p" style="justify-content:flex-end;text-align:right" title="${p2}">
-              <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p2 || "—"}</span>
-              ${p2Win ? '<span class="winmark"></span>' : ''}
-            </div>
+          <div class="vs">${scoreShown}</div>
+          <div class="p" style="justify-content:flex-end;text-align:right" title="${p2}">
+            <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p2 || "—"}</span>
+            ${p2Win ? '<span class="winmark"></span>' : ''}
           </div>
-        
-          ${hasImg ? `
-            <div class="draftTip">
-              <img src="${img}" alt="Draft da partida" loading="lazy" />
-            </div>
-          ` : ``}
-        `;
+        </div>
+
+        ${hasImg ? `
+          <div class="draftTip">
+            <img src="${img}" alt="Draft da partida" loading="lazy" />
+          </div>
+        ` : ``}
+      `;
 
       return el;
     }
@@ -782,16 +737,13 @@ function drawWires(nodes){
           hint.textContent = `Fonte: planilha publicada • ${expectedMatches} partidas`;
         }
 
-const r1 = padTo(sliceMatches(all, ...ranges.r1), 16);
-const r2 = padTo(sliceMatches(all, ...ranges.r2), 8);
-const r3 = padTo(sliceMatches(all, ...ranges.r3), 4);
-const r4 = padTo(sliceMatches(all, ...ranges.r4), 2);
-const r5 = padTo(sliceMatches(all, ...ranges.r5), 1);
+        const r1 = padTo(sliceMatches(all, ...ranges.r1), 16);
+        const r2 = padTo(sliceMatches(all, ...ranges.r2), 8);
+        const r3 = padTo(sliceMatches(all, ...ranges.r3), 4);
+        const r4 = padTo(sliceMatches(all, ...ranges.r4), 2);
+        const r5 = padTo(sliceMatches(all, ...ranges.r5), 1);
 
-const rounds = propagateRounds([r1,r2,r3,r4,r5]);
-
-const nodes = layout(rounds);
-
+        const nodes = layout([r1,r2,r3,r4,r5]);
 
         // desenha wires depois do layout estabilizar
         requestAnimationFrame(() => {
@@ -822,7 +774,4 @@ const nodes = layout(rounds);
   </script>
 </body>
 </html>
-
-
-
 
