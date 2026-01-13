@@ -15,11 +15,11 @@
       --line2:rgba(11,18,32,.08);
       --win:#16a34a;
       --lose:#e11d48;
-    
+
       /* “zoom” global (0.8 = 80%) */
       --uiScale: .80;
-    
-      /* dimensões (pode ajustar depois) */
+
+      /* dimensões (ajuste fino aqui) */
       --colW: 320px;
       --boxH: 52px;
       --boxPad: 10px;
@@ -29,7 +29,7 @@
 
     *{box-sizing:border-box}
     html,body{height:100%}
-       body{
+    body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       background:
@@ -39,7 +39,6 @@
       color:var(--ink);
       overflow:hidden;
     }
-
 
     header{
       height:64px;
@@ -67,9 +66,13 @@
       display:flex; gap:10px; align-items:center; color:var(--muted); font-size:12px;
     }
     .btn{
+      cursor:pointer;
       border:1px solid var(--line);
       background: rgba(255,255,255,.65);
       color:var(--ink);
+      padding:8px 12px;
+      border-radius:12px;
+      font-weight:900;
     }
     .btn:hover{ background: rgba(255,255,255,.92); }
 
@@ -78,34 +81,27 @@
       padding: 12px;
     }
 
-    /* palco do bracket */
+    /* palco do bracket (aplica o zoom 80% estilo Chrome) */
     .stage{
-      height:100%;
-      width:100%;
       position:relative;
       border:1px solid var(--line);
       border-radius: 18px;
       background: linear-gradient(to bottom, rgba(255,255,255,.75), rgba(255,255,255,.40));
       overflow:hidden;
-    
-      /* zoom 80% (estilo Chrome zoom-out) */
+
       transform: scale(var(--uiScale));
       transform-origin: top left;
-    
-      /* compensa a escala pra ainda caber na tela */
+
       width: calc(100% / var(--uiScale));
       height: calc(100% / var(--uiScale));
     }
 
-
-    /* área onde colocamos as colunas e os cards */
     .bracket{
       position:absolute;
       inset:0;
       padding: 14px;
     }
 
-    /* SVG por cima para desenhar conectores */
     svg#wires{
       position:absolute;
       inset:0;
@@ -139,7 +135,6 @@
       box-shadow: 0 12px 30px rgba(11,18,32,.10);
       overflow:hidden;
     }
-
     .m-top{
       height: 18px;
       display:flex;
@@ -156,7 +151,7 @@
       padding: 2px 8px;
       border-radius: 999px;
       border:1px solid var(--line);
-      background: rgba(0,0,0,.12);
+      background: rgba(0,0,0,.06);
     }
     .m-body{
       height: calc(var(--boxH) - 18px);
@@ -177,36 +172,26 @@
       overflow:hidden;
       text-overflow:ellipsis;
     }
-    .sc{
-      font-variant-numeric: tabular-nums;
-      font-weight:900;
-      opacity:.95;
-      font-size:13px;
-      color: var(--muted);
-      width: 22px;
-      text-align:center;
-    }
     .vs{
       color: var(--muted);
       font-weight:900;
       font-size:11px;
       letter-spacing:.35px;
-      opacity:.85;
+      opacity:.9;
       user-select:none;
     }
 
-    /* winner highlight estilo Challonge */
     .win{
-      outline: 1px solid rgba(46,204,113,.40);
+      outline: 1px solid rgba(22,163,74,.40);
       box-shadow:
-        0 0 0 1px rgba(46,204,113,.18) inset,
-        0 12px 35px rgba(46,204,113,.12);
+        0 0 0 1px rgba(22,163,74,.16) inset,
+        0 12px 35px rgba(22,163,74,.10);
     }
-    .win .chip{ border-color: rgba(46,204,113,.35); }
+    .win .chip{ border-color: rgba(22,163,74,.35); }
     .winmark{
       width: 8px; height: 8px; border-radius: 99px;
-      background: rgba(46,204,113,.85);
-      box-shadow: 0 0 0 3px rgba(46,204,113,.15);
+      background: rgba(22,163,74,.90);
+      box-shadow: 0 0 0 3px rgba(22,163,74,.15);
       flex: 0 0 auto;
     }
 
@@ -221,9 +206,8 @@
       font-size:11px;
       opacity:.95;
     }
-    .warn{ color: #ffcc66; font-weight:900; }
+    .warn{ color: #b45309; font-weight:900; }
 
-    /* responsivo leve */
     @media (max-width: 1700px){
       :root{ --colW: 300px; --boxH: 50px; --gapR1: 10px; }
     }
@@ -247,6 +231,7 @@
   <main>
     <div class="stage" id="stage">
       <svg id="wires"></svg>
+
       <div class="bracket" id="bracket">
         <div class="round" id="round1"><div class="r-title">Rodada 1 (32 → 16)</div></div>
         <div class="round" id="round2"><div class="r-title">Rodada 2 (16 → 8)</div></div>
@@ -265,27 +250,22 @@
   <script>
     // ==== Fonte (sua planilha publicada) ====
     const PUBHTML_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTihzZmyAJhTVjALmuX1R1YTGyuW0p-5umWppci2rQVRMJ5h1m2IrkZo4wi4MUN_fZ03vxu2vwFT2ob/pubhtml?gid=1150926553&single=true";
+    const CSV_URL = PUBHTML_URL.replace("/pubhtml", "/pub").replace(/(\?|&)single=true/g, "") + "&output=csv&single=true";
+
     function csvUrlNoCache(){
       return CSV_URL + "&t=" + Date.now();
     }
 
-
-    // linhas (sem o header):
-    // 0..15 = R1 (linhas 2..17)
-    // 16..23 = R2 (18..25)
-    // 24..27 = R3 (26..29)
-    // 28..29 = R4 (30..31)
-    // 30 = R5 (32)
+    // mapeamento por linhas (sem header)
     const ranges = {
-      r1: [0,15],
-      r2: [16,23],
-      r3: [24,27],
-      r4: [28,29],
-      r5: [30,30],
+      r1: [0,15],    // linhas 2..17
+      r2: [16,23],   // 18..25
+      r3: [24,27],   // 26..29
+      r4: [28,29],   // 30..31
+      r5: [30,30],   // 32
     };
     const expectedMatches = 31;
 
-    const stage = document.getElementById("stage");
     const bracket = document.getElementById("bracket");
     const wires = document.getElementById("wires");
     const last = document.getElementById("last");
@@ -344,17 +324,31 @@
       };
     }
 
-    const res = await fetch(csvUrlNoCache(), {
-      cache: "no-store",
-      headers: {
-        "pragma": "no-cache",
-        "cache-control": "no-cache"
-      }
-    });
+    async function loadViaCSV(){
+      const res = await fetch(csvUrlNoCache(), {
+        cache: "no-store",
+        headers: { "pragma":"no-cache", "cache-control":"no-cache" }
+      });
+      if (!res.ok) throw new Error("CSV fetch falhou");
+      const txt = await res.text();
+      const table = parseCSV(txt);
+      const H = normalizeHeaders(table[0]);
+      const body = table.slice(1);
+      return body.map(row => ({
+        id: H.id >= 0 ? row[H.id] : "",
+        type: H.type >= 0 ? row[H.type] : "",
+        player1: H.p1 >= 0 ? row[H.p1] : "",
+        player2: H.p2 >= 0 ? row[H.p2] : "",
+        draft: H.draft >= 0 ? row[H.draft] : "",
+        score1: H.s1 >= 0 ? row[H.s1] : "",
+        score2: H.s2 >= 0 ? row[H.s2] : "",
+        winner: H.winner >= 0 ? row[H.winner] : "",
+      }));
+    }
 
-
+    // fallback (se CSV bloquear por CORS)
     async function loadViaPubHtml(){
-      const res = await fetch(PUBHTML_URL, { cache:"no-store" });
+      const res = await fetch(PUBHTML_URL + "&t=" + Date.now(), { cache:"no-store" });
       if (!res.ok) throw new Error("pubhtml fetch falhou");
       const html = await res.text();
       const doc = new DOMParser().parseFromString(html, "text/html");
@@ -377,12 +371,13 @@
       }));
     }
 
-    function sliceMatches(all, a, b){ return all.slice(a, b+1); }
-
-    function winnerOf(m){
-      const w = String(m.winner||"").trim();
-      return w;
+    async function loadAll(){
+      try { return await loadViaCSV(); }
+      catch { return await loadViaPubHtml(); }
     }
+
+    function sliceMatches(all, a, b){ return all.slice(a, b+1); }
+    function winnerOf(m){ return String(m.winner||"").trim(); }
 
     function makeMatchEl(m){
       const el = document.createElement("div");
@@ -422,9 +417,15 @@
       return el;
     }
 
-    // calcula posições “Challonge-like”: cada round fica no meio dos dois filhos
-    function layoutAndDraw(rounds){
-      // limpa
+    function padTo(arr, n){
+      while(arr.length < n){
+        arr.push({id:"",type:"",player1:"",player2:"",draft:"",score1:"",score2:"",winner:""});
+      }
+      return arr;
+    }
+
+    function layout(rounds){
+      // remove antigos
       roundsEls.forEach(r => [...r.querySelectorAll(".match")].forEach(n => n.remove()));
       wires.innerHTML = "";
 
@@ -433,11 +434,10 @@
       const boxH = parseFloat(css.getPropertyValue("--boxH"));
       const gapR1 = parseFloat(css.getPropertyValue("--gapR1"));
 
-      const padX = 14;  // padding do .bracket
-      const topY = 14 + 26; // topo + espaço do título
-      const usableH = bracket.clientHeight - 14 - 12 - 26 - 20; // aproximação pro “pé”
+      const padX = 14;
+      const topY = 14 + 26;
+      const usableH = bracket.clientHeight - 14 - 12 - 26 - 20;
 
-      // posicionamento horizontal das colunas
       const totalW = (colW * 5) + (36 * 4);
       const startX = Math.max(padX, (bracket.clientWidth - totalW)/2);
       const gapX = 36;
@@ -446,52 +446,47 @@
         col.style.left = (startX + i*(colW+gapX)) + "px";
       });
 
-      // altura total da R1
       const r1Count = rounds[0].length;
       const r1Total = (r1Count * boxH) + ((r1Count - 1) * gapR1);
-
-      // centraliza verticalmente
       const baseY = Math.max(topY, topY + (usableH - r1Total)/2);
 
-      // guarda “centro Y” de cada match por round
       const centers = [[],[],[],[],[]];
       const nodes = [[],[],[],[],[]];
 
-      // Round 1: empilha
+      // R1
       for (let i=0;i<r1Count;i++){
-        const m = rounds[0][i];
-        const el = makeMatchEl(m);
+        const el = makeMatchEl(rounds[0][i]);
         const y = baseY + i*(boxH+gapR1);
         el.style.top = y + "px";
         roundsEls[0].appendChild(el);
-
         nodes[0].push(el);
         centers[0].push(y + boxH/2);
       }
 
-      // Round 2..5: cada match no meio de dois filhos
+      // R2..R5
       for (let r=1; r<5; r++){
-        const count = rounds[r].length;
-        for (let i=0;i<count;i++){
-          const m = rounds[r][i];
+        for (let i=0;i<rounds[r].length;i++){
           const childA = centers[r-1][i*2];
           const childB = centers[r-1][i*2+1];
           const cy = (childA + childB)/2;
           const y = cy - boxH/2;
 
-          const el = makeMatchEl(m);
+          const el = makeMatchEl(rounds[r][i]);
           el.style.top = y + "px";
           roundsEls[r].appendChild(el);
-
           nodes[r].push(el);
           centers[r].push(cy);
         }
       }
 
-      // Desenha conectores via SVG
+      return nodes; // importante pro desenho dos wires
+    }
+
+    function drawWires(nodes){
+      wires.innerHTML = "";
+      wires.setAttribute("viewBox", `0 0 ${bracket.clientWidth} ${bracket.clientHeight}`);
+
       const stageRect = bracket.getBoundingClientRect();
-      const svg = wires;
-      svg.setAttribute("viewBox", `0 0 ${bracket.clientWidth} ${bracket.clientHeight}`);
 
       function centerPoint(el, side){
         const r = el.getBoundingClientRect();
@@ -500,8 +495,8 @@
         return {x,y};
       }
 
-      const stroke = "rgba(234,240,255,.16)";
-      const stroke2 = "rgba(234,240,255,.10)";
+      const stroke = "rgba(11,18,32,.20)";
+      const stroke2 = "rgba(11,18,32,.12)";
 
       for (let r=1; r<5; r++){
         for (let i=0;i<nodes[r].length;i++){
@@ -515,18 +510,8 @@
 
           const midX = (c1R.x + pL.x) / 2;
 
-          // path: child -> midX (horizontal), then vertical join, then to parent
-          const d = [
-            `M ${c1R.x} ${c1R.y}`,
-            `L ${midX} ${c1R.y}`,
-            `L ${midX} ${c2R.y}`,
-            `L ${c2R.x} ${c2R.y}`
-          ].join(" ");
-
-          const d2 = [
-            `M ${midX} ${(c1R.y+c2R.y)/2}`,
-            `L ${pL.x} ${pL.y}`
-          ].join(" ");
+          const d = `M ${c1R.x} ${c1R.y} L ${midX} ${c1R.y} L ${midX} ${c2R.y} L ${c2R.x} ${c2R.y}`;
+          const d2 = `M ${midX} ${(c1R.y+c2R.y)/2} L ${pL.x} ${pL.y}`;
 
           const path = document.createElementNS("http://www.w3.org/2000/svg","path");
           path.setAttribute("d", d);
@@ -544,17 +529,9 @@
           path2.setAttribute("stroke-linecap","round");
           path2.setAttribute("stroke-linejoin","round");
 
-          svg.appendChild(path);
-          svg.appendChild(path2);
+          wires.appendChild(path);
+          wires.appendChild(path2);
         }
-      }
-    }
-
-    async function loadAll(){
-      try{
-        return await loadViaCSV();
-      }catch(e1){
-        return await loadViaPubHtml();
       }
     }
 
@@ -563,33 +540,30 @@
         const all = await loadAll();
 
         if (all.length < expectedMatches){
-          hint.innerHTML = `<span class="warn">Aviso: achei ${all.length}/${expectedMatches} partidas. Verifique se a planilha publicada tem as 31 linhas de jogos.</span>`;
+          hint.innerHTML = `<span class="warn">Aviso: achei ${all.length}/${expectedMatches} partidas. Confere se publicou as 31 linhas.</span>`;
         } else {
-          hint.textContent = `Fonte: Google Sheets publicado • ${expectedMatches} partidas`;
+          hint.textContent = `Fonte: planilha publicada • ${expectedMatches} partidas`;
         }
 
-        const r1 = sliceMatches(all, ...ranges.r1);
-        const r2 = sliceMatches(all, ...ranges.r2);
-        const r3 = sliceMatches(all, ...ranges.r3);
-        const r4 = sliceMatches(all, ...ranges.r4);
-        const r5 = sliceMatches(all, ...ranges.r5);
+        const r1 = padTo(sliceMatches(all, ...ranges.r1), 16);
+        const r2 = padTo(sliceMatches(all, ...ranges.r2), 8);
+        const r3 = padTo(sliceMatches(all, ...ranges.r3), 4);
+        const r4 = padTo(sliceMatches(all, ...ranges.r4), 2);
+        const r5 = padTo(sliceMatches(all, ...ranges.r5), 1);
 
-        // Se por algum motivo tiver menos linhas, preenche com “vazios”
-        function padTo(arr, n){
-          while(arr.length < n){
-            arr.push({id:"",type:"",player1:"",player2:"",draft:"",score1:"",score2:"",winner:""});
-          }
-          return arr;
-        }
+        const nodes = layout([r1,r2,r3,r4,r5]);
 
-        padTo(r1, 16); padTo(r2, 8); padTo(r3, 4); padTo(r4, 2); padTo(r5, 1);
-
-        layoutAndDraw([r1,r2,r3,r4,r5]);
+        // IMPORTANTÍSSIMO: desenhar wires só depois do layout estabilizar (2 frames)
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            drawWires(nodes);
+          });
+        });
 
         last.textContent = `Atualizado: ${nowStr()}`;
       }catch(err){
         console.error(err);
-        hint.innerHTML = `<span class="warn">Não consegui ler a planilha no browser (CORS). Se acontecer, publique também como CSV (Arquivo → Compartilhar → Publicar na Web → CSV).</span>`;
+        hint.innerHTML = `<span class="warn">Não consegui ler a planilha (CORS/cache). Tente “Publicar na web” como CSV também.</span>`;
         last.textContent = `Erro ao carregar`;
       }
     }
@@ -599,13 +573,11 @@
     loadAndRender();
     setInterval(loadAndRender, 20000);
 
-    // Recalcula conectores se o tamanho mudar (ex: F11 / fullscreen)
     let resizeTimer = null;
     window.addEventListener("resize", () => {
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(loadAndRender, 120);
+      resizeTimer = setTimeout(loadAndRender, 160);
     });
   </script>
 </body>
 </html>
-
