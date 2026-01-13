@@ -613,13 +613,7 @@ function layout(rounds){
   const usableH = bracket.clientHeight - 14 - 12 - 26 - 20;
 
   // posicionamento horizontal das colunas
-  const totalW = (colW * 5) + (36 * 4);
-  const startX = Math.max(padX, (bracket.clientWidth - totalW)/2);
-  const gapX = 36;
-
-  roundsEls.forEach((col, i)=>{
-    col.style.left = (startX + i*(colW+gapX)) + "px";
-  });
+layout(rounds)
 
   // Round 1: empilha e centraliza verticalmente
   const r1Count = rounds[0].length;
@@ -771,6 +765,48 @@ function drawWires(nodes){
     }
   }
 }
+function isVisibleMatch(m){
+  if (!m) return false;
+  if (m._ghost) return false;
+  if (isBye(m)) return false;
+
+  const p1 = String(m.player1||"").trim();
+  const p2 = String(m.player2||"").trim();
+  const id = String(m.id||"").trim();
+
+  // consideramos "visível" se tem players ou tem id preenchido
+  return (!!p1 || !!p2 || !!id);
+}
+
+function pruneEmptyRounds(rounds){
+  // mantém sempre a Rodada 1 (índice 0)
+  const keep = [true, true, true, true, true];
+
+  for (let r = 1; r < rounds.length; r++){
+    const anyVisible = rounds[r].some(isVisibleMatch);
+    keep[r] = anyVisible;
+  }
+
+  // se R2 estiver vazia, R3..R5 não fazem sentido aparecer também
+  // (porque não existe caminho completo)
+  for (let r = 1; r < rounds.length; r++){
+    if (!keep[r]){
+      for (let k = r+1; k < rounds.length; k++) keep[k] = false;
+      break;
+    }
+  }
+
+  const prunedRounds = [];
+  const map = []; // índices originais que ficaram
+  for (let r = 0; r < rounds.length; r++){
+    if (keep[r]){
+      prunedRounds.push(rounds[r]);
+      map.push(r);
+    }
+  }
+
+  return { prunedRounds, map };
+}
 
     async function loadAndRender(){
       try{
@@ -788,15 +824,15 @@ const r3 = padTo(sliceMatches(all, ...ranges.r3), 4);
 const r4 = padTo(sliceMatches(all, ...ranges.r4), 2);
 const r5 = padTo(sliceMatches(all, ...ranges.r5), 1);
 
-const rounds = propagateRounds([r1,r2,r3,r4,r5]);
+const roundsAll = propagateRounds([r1,r2,r3,r4,r5]);
 
-const nodes = layout(rounds);
+const { prunedRounds } = pruneEmptyRounds(roundsAll);
 
+const nodes = layout(prunedRounds);
 
-        // desenha wires depois do layout estabilizar
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            drawWires(nodes);
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    drawWires(nodes);
             applyTooltipFlip();
           });
         });
@@ -822,6 +858,7 @@ const nodes = layout(rounds);
   </script>
 </body>
 </html>
+
 
 
 
