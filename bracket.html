@@ -6,34 +6,40 @@
   <title>Bracket 32 Seeds (Tree)</title>
   <style>
     :root{
-      --bg:#0b1020;
-      --panel:#0f1833;
-      --ink:#eaf0ff;
-      --muted:rgba(234,240,255,.70);
-      --line:rgba(234,240,255,.14);
-      --line2:rgba(234,240,255,.10);
-      --win:#2ecc71;
-      --lose:#ff5c7a;
-
-      /* dimensões pra caber em FullHD */
+      /* LBI vibe: claro + azul */
+      --bg:#f6f9ff;
+      --panel:#ffffff;
+      --ink:#0b1220;
+      --muted:rgba(11,18,32,.68);
+      --line:rgba(11,18,32,.12);
+      --line2:rgba(11,18,32,.08);
+      --win:#16a34a;
+      --lose:#e11d48;
+    
+      /* “zoom” global (0.8 = 80%) */
+      --uiScale: .80;
+    
+      /* dimensões (pode ajustar depois) */
       --colW: 320px;
-      --boxH: 52px;     /* altura de cada partida */
+      --boxH: 52px;
       --boxPad: 10px;
-      --gapR1: 12px;    /* gap entre partidas da rodada 1 */
+      --gapR1: 12px;
       --radius: 14px;
     }
+
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{
+       body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       background:
-        radial-gradient(1200px 700px at 20% 10%, rgba(66,135,245,.22), transparent 55%),
-        radial-gradient(1000px 600px at 90% 30%, rgba(130,87,229,.18), transparent 60%),
+        radial-gradient(1100px 650px at 20% 10%, rgba(37,99,235,.14), transparent 55%),
+        radial-gradient(900px 550px at 85% 30%, rgba(99,102,241,.10), transparent 60%),
         var(--bg);
       color:var(--ink);
       overflow:hidden;
     }
+
 
     header{
       height:64px;
@@ -42,7 +48,7 @@
       justify-content:space-between;
       padding:0 18px;
       border-bottom:1px solid var(--line);
-      background: linear-gradient(to bottom, rgba(15,24,51,.78), rgba(15,24,51,.30));
+      background: rgba(255,255,255,.70);
       backdrop-filter: blur(10px);
     }
     .title{
@@ -55,21 +61,17 @@
       border:1px solid var(--line);
       border-radius:999px;
       color:var(--muted);
-      background: rgba(255,255,255,.04);
+      background: rgba(255,255,255,.60);
     }
     .meta{
       display:flex; gap:10px; align-items:center; color:var(--muted); font-size:12px;
     }
     .btn{
-      cursor:pointer;
       border:1px solid var(--line);
-      background: rgba(255,255,255,.04);
+      background: rgba(255,255,255,.65);
       color:var(--ink);
-      padding:8px 12px;
-      border-radius:12px;
-      font-weight:800;
     }
-    .btn:hover{ background: rgba(255,255,255,.08); }
+    .btn:hover{ background: rgba(255,255,255,.92); }
 
     main{
       height: calc(100% - 64px);
@@ -83,9 +85,18 @@
       position:relative;
       border:1px solid var(--line);
       border-radius: 18px;
-      background: linear-gradient(to bottom, rgba(15,24,51,.30), rgba(15,24,51,.12));
+      background: linear-gradient(to bottom, rgba(255,255,255,.75), rgba(255,255,255,.40));
       overflow:hidden;
+    
+      /* zoom 80% (estilo Chrome zoom-out) */
+      transform: scale(var(--uiScale));
+      transform-origin: top left;
+    
+      /* compensa a escala pra ainda caber na tela */
+      width: calc(100% / var(--uiScale));
+      height: calc(100% / var(--uiScale));
     }
+
 
     /* área onde colocamos as colunas e os cards */
     .bracket{
@@ -120,14 +131,15 @@
 
     .match{
       position:absolute;
-      width: calc(var(--colW) - 0px);
+      width: var(--colW);
       height: var(--boxH);
       border-radius: var(--radius);
       border:1px solid var(--line);
-      background: linear-gradient(to bottom, rgba(255,255,255,.04), rgba(0,0,0,.10));
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      background: linear-gradient(to bottom, rgba(255,255,255,.96), rgba(255,255,255,.72));
+      box-shadow: 0 12px 30px rgba(11,18,32,.10);
       overflow:hidden;
     }
+
     .m-top{
       height: 18px;
       display:flex;
@@ -253,7 +265,10 @@
   <script>
     // ==== Fonte (sua planilha publicada) ====
     const PUBHTML_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTihzZmyAJhTVjALmuX1R1YTGyuW0p-5umWppci2rQVRMJ5h1m2IrkZo4wi4MUN_fZ03vxu2vwFT2ob/pubhtml?gid=1150926553&single=true";
-    const CSV_URL = PUBHTML_URL.replace("/pubhtml", "/pub").replace(/(\?|&)single=true/g, "") + "&output=csv&single=true";
+    function csvUrlNoCache(){
+      return CSV_URL + "&t=" + Date.now();
+    }
+
 
     // linhas (sem o header):
     // 0..15 = R1 (linhas 2..17)
@@ -329,24 +344,14 @@
       };
     }
 
-    async function loadViaCSV(){
-      const res = await fetch(CSV_URL, { cache:"no-store" });
-      if (!res.ok) throw new Error("CSV fetch falhou");
-      const txt = await res.text();
-      const table = parseCSV(txt);
-      const H = normalizeHeaders(table[0]);
-      const body = table.slice(1);
-      return body.map(row => ({
-        id: H.id >= 0 ? row[H.id] : "",
-        type: H.type >= 0 ? row[H.type] : "",
-        player1: H.p1 >= 0 ? row[H.p1] : "",
-        player2: H.p2 >= 0 ? row[H.p2] : "",
-        draft: H.draft >= 0 ? row[H.draft] : "",
-        score1: H.s1 >= 0 ? row[H.s1] : "",
-        score2: H.s2 >= 0 ? row[H.s2] : "",
-        winner: H.winner >= 0 ? row[H.winner] : "",
-      }));
-    }
+    const res = await fetch(csvUrlNoCache(), {
+      cache: "no-store",
+      headers: {
+        "pragma": "no-cache",
+        "cache-control": "no-cache"
+      }
+    });
+
 
     async function loadViaPubHtml(){
       const res = await fetch(PUBHTML_URL, { cache:"no-store" });
@@ -603,3 +608,4 @@
   </script>
 </body>
 </html>
+
