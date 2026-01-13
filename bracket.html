@@ -3,29 +3,36 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Bracket 32 Seeds (R1–R5)</title>
+  <title>Bracket 32 Seeds (Tree)</title>
   <style>
     :root{
       --bg:#0b1020;
       --panel:#0f1833;
-      --panel2:#0c142c;
       --ink:#eaf0ff;
-      --muted:rgba(234,240,255,.72);
-      --line:rgba(234,240,255,.12);
+      --muted:rgba(234,240,255,.70);
+      --line:rgba(234,240,255,.14);
+      --line2:rgba(234,240,255,.10);
       --win:#2ecc71;
       --lose:#ff5c7a;
-      --warn:#ffcc66;
+
+      /* dimensões pra caber em FullHD */
+      --colW: 320px;
+      --boxH: 52px;     /* altura de cada partida */
+      --boxPad: 10px;
+      --gapR1: 12px;    /* gap entre partidas da rodada 1 */
+      --radius: 14px;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background: radial-gradient(1200px 700px at 20% 10%, rgba(66,135,245,.25), transparent 55%),
-                  radial-gradient(1000px 600px at 90% 30%, rgba(130,87,229,.22), transparent 60%),
-                  var(--bg);
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(66,135,245,.22), transparent 55%),
+        radial-gradient(1000px 600px at 90% 30%, rgba(130,87,229,.18), transparent 60%),
+        var(--bg);
       color:var(--ink);
-      overflow:hidden; /* fullHD 1 tela */
+      overflow:hidden;
     }
 
     header{
@@ -35,12 +42,12 @@
       justify-content:space-between;
       padding:0 18px;
       border-bottom:1px solid var(--line);
-      background: linear-gradient(to bottom, rgba(15,24,51,.75), rgba(15,24,51,.30));
+      background: linear-gradient(to bottom, rgba(15,24,51,.78), rgba(15,24,51,.30));
       backdrop-filter: blur(10px);
     }
     .title{
-      display:flex; gap:10px; align-items:center;
-      font-weight:800; letter-spacing:.3px;
+      display:flex; align-items:center; gap:10px;
+      font-weight:900; letter-spacing:.3px;
     }
     .badge{
       font-size:12px;
@@ -60,134 +67,156 @@
       color:var(--ink);
       padding:8px 12px;
       border-radius:12px;
-      font-weight:700;
+      font-weight:800;
     }
     .btn:hover{ background: rgba(255,255,255,.08); }
 
     main{
       height: calc(100% - 64px);
+      padding: 12px;
+    }
+
+    /* palco do bracket */
+    .stage{
+      height:100%;
+      width:100%;
+      position:relative;
+      border:1px solid var(--line);
+      border-radius: 18px;
+      background: linear-gradient(to bottom, rgba(15,24,51,.30), rgba(15,24,51,.12));
+      overflow:hidden;
+    }
+
+    /* área onde colocamos as colunas e os cards */
+    .bracket{
+      position:absolute;
+      inset:0;
       padding: 14px;
     }
 
-    /* 5 colunas, tudo na tela fullHD */
-    .grid{
+    /* SVG por cima para desenhar conectores */
+    svg#wires{
+      position:absolute;
+      inset:0;
+      width:100%;
       height:100%;
-      display:grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap:12px;
-      align-items:stretch;
+      pointer-events:none;
     }
 
-    .col{
-      background: rgba(255,255,255,.03);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      min-width:0;
+    .round{
+      position:absolute;
+      top: 14px;
+      width: var(--colW);
+      height: calc(100% - 28px);
     }
-    .col h2{
-      margin:0;
-      padding:12px 12px 10px;
-      font-size:14px;
+    .r-title{
+      font-size:13px;
       font-weight:900;
       letter-spacing:.4px;
-      border-bottom:1px solid var(--line);
-      background: linear-gradient(to bottom, rgba(12,20,44,.70), rgba(12,20,44,.18));
-    }
-    .list{
-      padding:10px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      overflow:hidden;
+      color: var(--muted);
+      margin: 0 0 10px 0;
+      padding: 0 2px;
     }
 
     .match{
+      position:absolute;
+      width: calc(var(--colW) - 0px);
+      height: var(--boxH);
+      border-radius: var(--radius);
       border:1px solid var(--line);
-      border-radius:16px;
-      background: linear-gradient(to bottom, rgba(15,24,51,.70), rgba(15,24,51,.35));
-      padding:10px;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      min-height:64px;
+      background: linear-gradient(to bottom, rgba(255,255,255,.04), rgba(0,0,0,.10));
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      overflow:hidden;
     }
-    .toprow{
+    .m-top{
+      height: 18px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:10px;
-      color:var(--muted);
-      font-size:11px;
+      padding: 6px var(--boxPad) 0;
+      color: var(--muted);
+      font-size: 11px;
     }
-    .idchip{
-      padding:3px 8px;
-      border-radius:999px;
+    .chip{
+      font-size:11px;
+      font-weight:900;
+      color: var(--ink);
+      padding: 2px 8px;
+      border-radius: 999px;
       border:1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      font-weight:800;
-      color:var(--ink);
-      font-size:11px;
-    }
-
-    .rows{
-      display:grid;
-      grid-template-rows: 1fr 1fr;
-      gap:6px;
-    }
-    .team{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding:8px 10px;
-      border-radius:12px;
-      border:1px solid rgba(234,240,255,.10);
       background: rgba(0,0,0,.12);
-      font-weight:800;
-      min-width:0;
     }
-    .name{
+    .m-body{
+      height: calc(var(--boxH) - 18px);
+      display:grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items:center;
+      gap:10px;
+      padding: 0 var(--boxPad);
+    }
+    .p{
       min-width:0;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-weight:900;
+      font-size:13px;
+      white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
-      white-space:nowrap;
     }
-    .score{
+    .sc{
       font-variant-numeric: tabular-nums;
+      font-weight:900;
       opacity:.95;
+      font-size:13px;
+      color: var(--muted);
+      width: 22px;
+      text-align:center;
+    }
+    .vs{
+      color: var(--muted);
+      font-weight:900;
+      font-size:11px;
+      letter-spacing:.35px;
+      opacity:.85;
+      user-select:none;
     }
 
+    /* winner highlight estilo Challonge */
     .win{
-      border-color: rgba(46,204,113,.45);
-      background: rgba(46,204,113,.10);
-      box-shadow: 0 0 0 1px rgba(46,204,113,.14) inset;
+      outline: 1px solid rgba(46,204,113,.40);
+      box-shadow:
+        0 0 0 1px rgba(46,204,113,.18) inset,
+        0 12px 35px rgba(46,204,113,.12);
     }
-    .lose{
-      border-color: rgba(255,92,122,.35);
-      background: rgba(255,92,122,.08);
+    .win .chip{ border-color: rgba(46,204,113,.35); }
+    .winmark{
+      width: 8px; height: 8px; border-radius: 99px;
+      background: rgba(46,204,113,.85);
+      box-shadow: 0 0 0 3px rgba(46,204,113,.15);
+      flex: 0 0 auto;
     }
 
     .foot{
-      margin-top:auto;
-      padding:10px 12px;
-      border-top:1px solid var(--line);
-      color:var(--muted);
-      font-size:11px;
+      position:absolute;
+      left:14px;
+      bottom:12px;
+      right:14px;
       display:flex;
       justify-content:space-between;
-      gap:10px;
+      color: var(--muted);
+      font-size:11px;
+      opacity:.95;
     }
-    .status-warn{ color: var(--warn); font-weight:800; }
+    .warn{ color: #ffcc66; font-weight:900; }
 
-    /* Ajuste visual pra caber melhor no fullHD */
-    @media (max-width: 1400px){
-      header{height:56px}
-      main{height: calc(100% - 56px)}
-      .match{padding:9px}
-      .team{padding:7px 9px}
+    /* responsivo leve */
+    @media (max-width: 1700px){
+      :root{ --colW: 300px; --boxH: 50px; --gapR1: 10px; }
+    }
+    @media (max-width: 1500px){
+      :root{ --colW: 280px; --boxH: 48px; --gapR1: 9px; }
     }
   </style>
 </head>
@@ -195,7 +224,7 @@
   <header>
     <div class="title">
       <span>IMBR : BRACKET</span>
-      <span class="badge">32 seeds • R1–R5</span>
+      <span class="badge">32 seeds • árvore R1–R5</span>
     </div>
     <div class="meta">
       <span id="last">Carregando…</span>
@@ -204,135 +233,90 @@
   </header>
 
   <main>
-    <div class="grid">
-      <section class="col">
-        <h2>Rodada 1 (32 → 16)</h2>
-        <div class="list" id="r1"></div>
-        <div class="foot"><span>Linhas 2–17</span><span id="s1"></span></div>
-      </section>
+    <div class="stage" id="stage">
+      <svg id="wires"></svg>
+      <div class="bracket" id="bracket">
+        <div class="round" id="round1"><div class="r-title">Rodada 1 (32 → 16)</div></div>
+        <div class="round" id="round2"><div class="r-title">Rodada 2 (16 → 8)</div></div>
+        <div class="round" id="round3"><div class="r-title">Rodada 3 (8 → 4)</div></div>
+        <div class="round" id="round4"><div class="r-title">Rodada 4 (4 → 2)</div></div>
+        <div class="round" id="round5"><div class="r-title">Rodada 5 (Final)</div></div>
 
-      <section class="col">
-        <h2>Rodada 2 (16 → 8)</h2>
-        <div class="list" id="r2"></div>
-        <div class="foot"><span>Linhas 18–25</span><span id="s2"></span></div>
-      </section>
-
-      <section class="col">
-        <h2>Rodada 3 (8 → 4)</h2>
-        <div class="list" id="r3"></div>
-        <div class="foot"><span>Linhas 26–29</span><span id="s3"></span></div>
-      </section>
-
-      <section class="col">
-        <h2>Rodada 4 (4 → 2)</h2>
-        <div class="list" id="r4"></div>
-        <div class="foot"><span>Linhas 30–31</span><span id="s4"></span></div>
-      </section>
-
-      <section class="col">
-        <h2>Rodada 5 (Final)</h2>
-        <div class="list" id="r5"></div>
-        <div class="foot"><span>Linha 32</span><span id="s5"></span></div>
-      </section>
+        <div class="foot">
+          <span id="hint"></span>
+          <span>Auto-update: 20s</span>
+        </div>
+      </div>
     </div>
   </main>
 
   <script>
-    // ✅ Seu link publicado (pubhtml) — deixei o mesmo que você enviou:
+    // ==== Fonte (sua planilha publicada) ====
     const PUBHTML_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTihzZmyAJhTVjALmuX1R1YTGyuW0p-5umWppci2rQVRMJ5h1m2IrkZo4wi4MUN_fZ03vxu2vwFT2ob/pubhtml?gid=1150926553&single=true";
+    const CSV_URL = PUBHTML_URL.replace("/pubhtml", "/pub").replace(/(\?|&)single=true/g, "") + "&output=csv&single=true";
 
-    // Tenta CSV primeiro (mais fácil de parsear). Se CORS bloquear, cai pro parse do pubhtml.
-    const CSV_URL = PUBHTML_URL
-      .replace("/pubhtml", "/pub")
-      .replace(/(\?|&)single=true/g, "")
-      + "&output=csv&single=true";
-
-    // Mapeamento por LINHA da planilha:
-    // Linha 1 = cabeçalho
-    // Linhas 2-17 = R1 (16)
-    // 18-25 = R2 (8)
-    // 26-29 = R3 (4)
-    // 30-31 = R4 (2)  ← (se você realmente estiver usando 30 e 32, me diga e eu ajusto)
-    // 32 = R5 (1)
+    // linhas (sem o header):
+    // 0..15 = R1 (linhas 2..17)
+    // 16..23 = R2 (18..25)
+    // 24..27 = R3 (26..29)
+    // 28..29 = R4 (30..31)
+    // 30 = R5 (32)
     const ranges = {
-      r1: [0, 15],   // rows array (0 = linha 2)
-      r2: [16, 23],
-      r3: [24, 27],
-      r4: [28, 29],
-      r5: [30, 30],
+      r1: [0,15],
+      r2: [16,23],
+      r3: [24,27],
+      r4: [28,29],
+      r5: [30,30],
     };
+    const expectedMatches = 31;
 
-    const els = {
-      r1: document.getElementById("r1"),
-      r2: document.getElementById("r2"),
-      r3: document.getElementById("r3"),
-      r4: document.getElementById("r4"),
-      r5: document.getElementById("r5"),
-      last: document.getElementById("last"),
-      s1: document.getElementById("s1"),
-      s2: document.getElementById("s2"),
-      s3: document.getElementById("s3"),
-      s4: document.getElementById("s4"),
-      s5: document.getElementById("s5"),
-    };
+    const stage = document.getElementById("stage");
+    const bracket = document.getElementById("bracket");
+    const wires = document.getElementById("wires");
+    const last = document.getElementById("last");
+    const hint = document.getElementById("hint");
+
+    const roundsEls = [
+      document.getElementById("round1"),
+      document.getElementById("round2"),
+      document.getElementById("round3"),
+      document.getElementById("round4"),
+      document.getElementById("round5"),
+    ];
 
     function nowStr(){
       const d = new Date();
       return d.toLocaleString("pt-BR", { hour12:false });
     }
 
-    function escapeHtml(s){
-      return String(s ?? "").replace(/[&<>"']/g, m => (
-        {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]
-      ));
-    }
-
     function parseCSV(text){
-      // Parser simples de CSV (suporta aspas)
       const rows = [];
       let cur = [], field = "", inQuotes = false;
-
       for (let i=0; i<text.length; i++){
-        const c = text[i];
-        const next = text[i+1];
-
-        if (c === '"' ){
+        const c = text[i], next = text[i+1];
+        if (c === '"'){
           if (inQuotes && next === '"'){ field += '"'; i++; }
           else inQuotes = !inQuotes;
         } else if (c === ',' && !inQuotes){
           cur.push(field); field = "";
         } else if ((c === '\n' || c === '\r') && !inQuotes){
           if (c === '\r' && next === '\n') i++;
-          cur.push(field);
-          rows.push(cur);
+          cur.push(field); rows.push(cur);
           cur = []; field = "";
-        } else {
-          field += c;
-        }
+        } else field += c;
       }
-      if (field.length || cur.length){
-        cur.push(field);
-        rows.push(cur);
-      }
+      if (field.length || cur.length){ cur.push(field); rows.push(cur); }
       return rows.filter(r => r.some(x => String(x).trim() !== ""));
     }
 
     function normalizeHeaders(headerRow){
       const map = {};
-      headerRow.forEach((h, idx) => {
-        const key = String(h).trim().toLowerCase();
-        map[key] = idx;
-      });
-
-      // aceita variações (ex: "pos" no lugar de "id")
-      const idx = (name, fallbackNames=[]) => {
+      headerRow.forEach((h, idx) => map[String(h).trim().toLowerCase()] = idx);
+      const idx = (name, fall=[]) => {
         if (map[name] !== undefined) return map[name];
-        for (const f of fallbackNames){
-          if (map[f] !== undefined) return map[f];
-        }
+        for (const f of fall) if (map[f] !== undefined) return map[f];
         return -1;
       };
-
       return {
         id: idx("id", ["pos"]),
         type: idx("type"),
@@ -345,82 +329,13 @@
       };
     }
 
-    function card(match){
-      const id = escapeHtml(match.id || "");
-      const type = escapeHtml(match.type || "");
-      const draft = escapeHtml(match.draft || "");
-      const p1 = escapeHtml(match.player1 || "");
-      const p2 = escapeHtml(match.player2 || "");
-      const sc1 = escapeHtml(match.score1 || "");
-      const sc2 = escapeHtml(match.score2 || "");
-      const w = String(match.winner || "").trim();
-
-      const p1Win = w && w === String(match.player1 || "").trim();
-      const p2Win = w && w === String(match.player2 || "").trim();
-
-      return `
-        <div class="match">
-          <div class="toprow">
-            <span class="idchip">${id || "—"}</span>
-            <span>${type || ""}${draft ? " • " + draft : ""}</span>
-          </div>
-          <div class="rows">
-            <div class="team ${p1Win ? "win" : (w ? "lose" : "")}">
-              <span class="name">${p1 || "—"}</span>
-              <span class="score">${sc1 !== "" ? sc1 : " "}</span>
-            </div>
-            <div class="team ${p2Win ? "win" : (w ? "lose" : "")}">
-              <span class="name">${p2 || "—"}</span>
-              <span class="score">${sc2 !== "" ? sc2 : " "}</span>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function sliceRange(rows, a, b){
-      return rows.slice(a, b + 1);
-    }
-
-    function countFinished(rows){
-      let done = 0;
-      for (const r of rows){
-        if (String(r.winner || "").trim()) done++;
-      }
-      return done;
-    }
-
-    function render(allMatches){
-      const r1 = sliceRange(allMatches, ...ranges.r1);
-      const r2 = sliceRange(allMatches, ...ranges.r2);
-      const r3 = sliceRange(allMatches, ...ranges.r3);
-      const r4 = sliceRange(allMatches, ...ranges.r4);
-      const r5 = sliceRange(allMatches, ...ranges.r5);
-
-      els.r1.innerHTML = r1.map(card).join("");
-      els.r2.innerHTML = r2.map(card).join("");
-      els.r3.innerHTML = r3.map(card).join("");
-      els.r4.innerHTML = r4.map(card).join("");
-      els.r5.innerHTML = r5.map(card).join("");
-
-      els.s1.textContent = `${countFinished(r1)}/${r1.length} finalizadas`;
-      els.s2.textContent = `${countFinished(r2)}/${r2.length} finalizadas`;
-      els.s3.textContent = `${countFinished(r3)}/${r3.length} finalizadas`;
-      els.s4.textContent = `${countFinished(r4)}/${r4.length} finalizadas`;
-      els.s5.textContent = `${countFinished(r5)}/${r5.length} finalizadas`;
-
-      els.last.textContent = `Atualizado: ${nowStr()}`;
-    }
-
     async function loadViaCSV(){
-      const res = await fetch(CSV_URL, { cache: "no-store" });
+      const res = await fetch(CSV_URL, { cache:"no-store" });
       if (!res.ok) throw new Error("CSV fetch falhou");
       const txt = await res.text();
       const table = parseCSV(txt);
-      const header = table[0];
-      const H = normalizeHeaders(header);
-
-      const body = table.slice(1); // remove header
+      const H = normalizeHeaders(table[0]);
+      const body = table.slice(1);
       return body.map(row => ({
         id: H.id >= 0 ? row[H.id] : "",
         type: H.type >= 0 ? row[H.type] : "",
@@ -434,21 +349,17 @@
     }
 
     async function loadViaPubHtml(){
-      const res = await fetch(PUBHTML_URL, { cache: "no-store" });
+      const res = await fetch(PUBHTML_URL, { cache:"no-store" });
       if (!res.ok) throw new Error("pubhtml fetch falhou");
       const html = await res.text();
       const doc = new DOMParser().parseFromString(html, "text/html");
       const table = doc.querySelector("table");
       if (!table) throw new Error("não achei tabela no pubhtml");
-
       const rows = [...table.querySelectorAll("tr")].map(tr =>
         [...tr.querySelectorAll("th,td")].map(td => td.textContent.trim())
       ).filter(r => r.length);
-
-      const header = rows[0];
-      const H = normalizeHeaders(header);
+      const H = normalizeHeaders(rows[0]);
       const body = rows.slice(1);
-
       return body.map(row => ({
         id: H.id >= 0 ? row[H.id] : "",
         type: H.type >= 0 ? row[H.type] : "",
@@ -461,38 +372,234 @@
       }));
     }
 
-    async function loadAndRender(){
-      // Mostra aviso se o tamanho vier diferente do esperado
-      const expected = 31; // 16+8+4+2+1
+    function sliceMatches(all, a, b){ return all.slice(a, b+1); }
+
+    function winnerOf(m){
+      const w = String(m.winner||"").trim();
+      return w;
+    }
+
+    function makeMatchEl(m){
+      const el = document.createElement("div");
+      el.className = "match";
+      el.dataset.id = String(m.id||"").trim();
+
+      const w = winnerOf(m);
+      const p1 = String(m.player1||"").trim();
+      const p2 = String(m.player2||"").trim();
+      const p1Win = w && w === p1;
+      const p2Win = w && w === p2;
+
+      if (w) el.classList.add("win");
+
+      const chipText = (m.id || "—");
+      const typeText = (m.type || "");
+      const draftText = String(m.draft||"").trim();
+      const rightTop = [typeText, draftText].filter(Boolean).join(" • ");
+
+      el.innerHTML = `
+        <div class="m-top">
+          <span class="chip">${chipText}</span>
+          <span>${rightTop}</span>
+        </div>
+        <div class="m-body">
+          <div class="p" title="${p1}">
+            ${p1Win ? '<span class="winmark"></span>' : ''}
+            <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p1 || "—"}</span>
+          </div>
+          <div class="vs">${(m.score1!==""||m.score2!=="") ? `${m.score1||"0"}–${m.score2||"0"}` : "VS"}</div>
+          <div class="p" style="justify-content:flex-end;text-align:right" title="${p2}">
+            <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p2 || "—"}</span>
+            ${p2Win ? '<span class="winmark"></span>' : ''}
+          </div>
+        </div>
+      `;
+      return el;
+    }
+
+    // calcula posições “Challonge-like”: cada round fica no meio dos dois filhos
+    function layoutAndDraw(rounds){
+      // limpa
+      roundsEls.forEach(r => [...r.querySelectorAll(".match")].forEach(n => n.remove()));
+      wires.innerHTML = "";
+
+      const css = getComputedStyle(document.documentElement);
+      const colW = parseFloat(css.getPropertyValue("--colW"));
+      const boxH = parseFloat(css.getPropertyValue("--boxH"));
+      const gapR1 = parseFloat(css.getPropertyValue("--gapR1"));
+
+      const padX = 14;  // padding do .bracket
+      const topY = 14 + 26; // topo + espaço do título
+      const usableH = bracket.clientHeight - 14 - 12 - 26 - 20; // aproximação pro “pé”
+
+      // posicionamento horizontal das colunas
+      const totalW = (colW * 5) + (36 * 4);
+      const startX = Math.max(padX, (bracket.clientWidth - totalW)/2);
+      const gapX = 36;
+
+      roundsEls.forEach((col, i)=>{
+        col.style.left = (startX + i*(colW+gapX)) + "px";
+      });
+
+      // altura total da R1
+      const r1Count = rounds[0].length;
+      const r1Total = (r1Count * boxH) + ((r1Count - 1) * gapR1);
+
+      // centraliza verticalmente
+      const baseY = Math.max(topY, topY + (usableH - r1Total)/2);
+
+      // guarda “centro Y” de cada match por round
+      const centers = [[],[],[],[],[]];
+      const nodes = [[],[],[],[],[]];
+
+      // Round 1: empilha
+      for (let i=0;i<r1Count;i++){
+        const m = rounds[0][i];
+        const el = makeMatchEl(m);
+        const y = baseY + i*(boxH+gapR1);
+        el.style.top = y + "px";
+        roundsEls[0].appendChild(el);
+
+        nodes[0].push(el);
+        centers[0].push(y + boxH/2);
+      }
+
+      // Round 2..5: cada match no meio de dois filhos
+      for (let r=1; r<5; r++){
+        const count = rounds[r].length;
+        for (let i=0;i<count;i++){
+          const m = rounds[r][i];
+          const childA = centers[r-1][i*2];
+          const childB = centers[r-1][i*2+1];
+          const cy = (childA + childB)/2;
+          const y = cy - boxH/2;
+
+          const el = makeMatchEl(m);
+          el.style.top = y + "px";
+          roundsEls[r].appendChild(el);
+
+          nodes[r].push(el);
+          centers[r].push(cy);
+        }
+      }
+
+      // Desenha conectores via SVG
+      const stageRect = bracket.getBoundingClientRect();
+      const svg = wires;
+      svg.setAttribute("viewBox", `0 0 ${bracket.clientWidth} ${bracket.clientHeight}`);
+
+      function centerPoint(el, side){
+        const r = el.getBoundingClientRect();
+        const x = (side === "left") ? (r.left - stageRect.left) : (r.right - stageRect.left);
+        const y = (r.top - stageRect.top) + (r.height/2);
+        return {x,y};
+      }
+
+      const stroke = "rgba(234,240,255,.16)";
+      const stroke2 = "rgba(234,240,255,.10)";
+
+      for (let r=1; r<5; r++){
+        for (let i=0;i<nodes[r].length;i++){
+          const parent = nodes[r][i];
+          const child1 = nodes[r-1][i*2];
+          const child2 = nodes[r-1][i*2+1];
+
+          const pL = centerPoint(parent, "left");
+          const c1R = centerPoint(child1, "right");
+          const c2R = centerPoint(child2, "right");
+
+          const midX = (c1R.x + pL.x) / 2;
+
+          // path: child -> midX (horizontal), then vertical join, then to parent
+          const d = [
+            `M ${c1R.x} ${c1R.y}`,
+            `L ${midX} ${c1R.y}`,
+            `L ${midX} ${c2R.y}`,
+            `L ${c2R.x} ${c2R.y}`
+          ].join(" ");
+
+          const d2 = [
+            `M ${midX} ${(c1R.y+c2R.y)/2}`,
+            `L ${pL.x} ${pL.y}`
+          ].join(" ");
+
+          const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+          path.setAttribute("d", d);
+          path.setAttribute("fill","none");
+          path.setAttribute("stroke", stroke2);
+          path.setAttribute("stroke-width","2");
+          path.setAttribute("stroke-linecap","round");
+          path.setAttribute("stroke-linejoin","round");
+
+          const path2 = document.createElementNS("http://www.w3.org/2000/svg","path");
+          path2.setAttribute("d", d2);
+          path2.setAttribute("fill","none");
+          path2.setAttribute("stroke", stroke);
+          path2.setAttribute("stroke-width","2");
+          path2.setAttribute("stroke-linecap","round");
+          path2.setAttribute("stroke-linejoin","round");
+
+          svg.appendChild(path);
+          svg.appendChild(path2);
+        }
+      }
+    }
+
+    async function loadAll(){
       try{
-        const matches = await loadViaCSV();
-        if (matches.length < expected) {
-          els.last.innerHTML = `<span class="status-warn">Dados insuficientes (${matches.length}/${expected}). Verifique se a planilha publicada tem as 31 partidas.</span>`;
-        }
-        render(matches);
-        return;
+        return await loadViaCSV();
       }catch(e1){
-        // fallback: parse pubhtml
-        try{
-          const matches = await loadViaPubHtml();
-          if (matches.length < expected) {
-            els.last.innerHTML = `<span class="status-warn">Dados insuficientes (${matches.length}/${expected}). Verifique se a planilha publicada tem as 31 partidas.</span>`;
-          }
-          render(matches);
-          return;
-        }catch(e2){
-          els.last.innerHTML =
-            `<span class="status-warn">Não consegui ler a planilha via navegador (CORS). Se acontecer, publique também como CSV: Arquivo → Compartilhar → Publicar na Web → CSV.</span>`;
-          console.error(e1, e2);
+        return await loadViaPubHtml();
+      }
+    }
+
+    async function loadAndRender(){
+      try{
+        const all = await loadAll();
+
+        if (all.length < expectedMatches){
+          hint.innerHTML = `<span class="warn">Aviso: achei ${all.length}/${expectedMatches} partidas. Verifique se a planilha publicada tem as 31 linhas de jogos.</span>`;
+        } else {
+          hint.textContent = `Fonte: Google Sheets publicado • ${expectedMatches} partidas`;
         }
+
+        const r1 = sliceMatches(all, ...ranges.r1);
+        const r2 = sliceMatches(all, ...ranges.r2);
+        const r3 = sliceMatches(all, ...ranges.r3);
+        const r4 = sliceMatches(all, ...ranges.r4);
+        const r5 = sliceMatches(all, ...ranges.r5);
+
+        // Se por algum motivo tiver menos linhas, preenche com “vazios”
+        function padTo(arr, n){
+          while(arr.length < n){
+            arr.push({id:"",type:"",player1:"",player2:"",draft:"",score1:"",score2:"",winner:""});
+          }
+          return arr;
+        }
+
+        padTo(r1, 16); padTo(r2, 8); padTo(r3, 4); padTo(r4, 2); padTo(r5, 1);
+
+        layoutAndDraw([r1,r2,r3,r4,r5]);
+
+        last.textContent = `Atualizado: ${nowStr()}`;
+      }catch(err){
+        console.error(err);
+        hint.innerHTML = `<span class="warn">Não consegui ler a planilha no browser (CORS). Se acontecer, publique também como CSV (Arquivo → Compartilhar → Publicar na Web → CSV).</span>`;
+        last.textContent = `Erro ao carregar`;
       }
     }
 
     document.getElementById("reload").addEventListener("click", loadAndRender);
 
-    // Auto refresh
     loadAndRender();
     setInterval(loadAndRender, 20000);
+
+    // Recalcula conectores se o tamanho mudar (ex: F11 / fullscreen)
+    let resizeTimer = null;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(loadAndRender, 120);
+    });
   </script>
 </body>
 </html>
