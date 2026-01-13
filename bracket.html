@@ -136,7 +136,7 @@
       overflow:visible; /* tooltip pode sair pra fora */
     }
 
-    /* BYE: some a pill sem mover nada */
+    /* BYE (99-0): some a pill sem mover nada */
     .match.isBye{
       visibility: hidden;       /* ocupa o espaço, mas some */
       pointer-events: none;     /* não interage */
@@ -217,22 +217,22 @@
     .warn{ color: #b45309; font-weight:900; }
 
     /* Tooltip do draft (imagem) – abre pro lado */
-.draftTip{
-  position:absolute;
-  left: calc(100% + 12px);   /* ✅ vai para o lado direito */
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 50;
+    .draftTip{
+      position:absolute;
+      left: calc(100% + 12px);   /* direita */
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 50;
 
-  width: 800px;
-  max-width: 85vw;
-  padding: 10px;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,.96);
-  box-shadow: 0 18px 40px rgba(11,18,32,.16);
-  display:none;
-}
+      width: 800px;
+      max-width: 85vw;
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.96);
+      box-shadow: 0 18px 40px rgba(11,18,32,.16);
+      display:none;
+    }
 
     .draftTip img{
       width:100%;
@@ -243,18 +243,6 @@
     }
     .draftTip .cap{ display:none; }
 
-    .draftBtn{
-      cursor:pointer;
-      font-size:11px;
-      font-weight:900;
-      padding: 2px 8px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: rgba(0,0,0,.05);
-      color: var(--ink);
-      user-select:none;
-    }
-    .draftBtn:hover{ background: rgba(0,0,0,.08); }
     .match.hasDraft:hover .draftTip{ display:block; }
 
     /* flip automático para esquerda */
@@ -375,10 +363,8 @@
         draft: idx("draft"),
         s1: idx("score1"),
         s2: idx("score2"),
-
         // tenta achar por header; se não existir, cai no fallback "coluna F" (índice 5)
         draft_img: idx("draft_img", ["draftimage","draft_image","image","img","link","draft_link"]),
-
         winner: idx("winner"),
       };
     }
@@ -408,10 +394,8 @@
         draft: pickCell(row, H.draft),
         score1: pickCell(row, H.s1),
         score2: pickCell(row, H.s2),
-
         // fallback "coluna F" = índice 5 (0-based)
         draft_img: pickCell(row, H.draft_img, 5),
-
         winner: pickCell(row, H.winner),
       }));
     }
@@ -439,10 +423,8 @@
         draft: pickCell(row, H.draft),
         score1: pickCell(row, H.s1),
         score2: pickCell(row, H.s2),
-
         // fallback "coluna F" = índice 5 (0-based)
         draft_img: pickCell(row, H.draft_img, 5),
-
         winner: pickCell(row, H.winner),
       }));
     }
@@ -460,13 +442,6 @@
       const s2 = parseInt(String(m.score2||"").trim(), 10);
       return (s1 === 99 && s2 === 0) || (s1 === 0 && s2 === 99);
     }
-    function isEmptyMatch(m){
-      const p1 = String(m.player1||"").trim();
-      const p2 = String(m.player2||"").trim();
-      const id = String(m.id||"").trim();
-      // considera vazio quando não tem players e nem id
-      return (!p1 && !p2 && !id);
-    }
 
     function normalizeImgUrl(url){
       const u = String(url||"").trim();
@@ -478,53 +453,14 @@
 
       return u;
     }
-    function advancerFromMatch(m){
-      // preferência: winner
-      const w = String(m.winner || "").trim();
-      if (w) return w;
-    
-      // fallback: se só tiver 1 player preenchido, ele avança
-      const p1 = String(m.player1 || "").trim();
-      const p2 = String(m.player2 || "").trim();
-      if (p1 && !p2) return p1;
-      if (!p1 && p2) return p2;
-    
-      return "";
-    }
-    
-    // preenche players de R2..R5 a partir dos winners de R1..R4
-    function propagateRounds(rounds){
-      for (let r = 1; r < rounds.length; r++){
-        for (let i = 0; i < rounds[r].length; i++){
-          const a = rounds[r-1][i*2];
-          const b = rounds[r-1][i*2 + 1];
-    
-          const pa = a ? advancerFromMatch(a) : "";
-          const pb = b ? advancerFromMatch(b) : "";
-    
-          // só sobrescreve se ainda estiver vazio na planilha
-          if (!String(rounds[r][i].player1 || "").trim() && pa) rounds[r][i].player1 = pa;
-          if (!String(rounds[r][i].player2 || "").trim() && pb) rounds[r][i].player2 = pb;
-    
-          // se o match inteiro continuar vazio depois disso, marca como "isBye" pra sumir no site
-          const p1 = String(rounds[r][i].player1 || "").trim();
-          const p2 = String(rounds[r][i].player2 || "").trim();
-          if (!p1 && !p2){
-            rounds[r][i]._ghost = true; // flag interno
-          }
-        }
-      }
-      return rounds;
-    }
 
     function makeMatchEl(m){
       const el = document.createElement("div");
       el.className = "match";
       el.dataset.id = String(m.id||"").trim();
-      if (m._ghost) el.classList.add("isBye");
 
-      // BYE ou vazio: some a pill inteira, mas mantém espaço/posição
-      if (isBye(m) || isEmptyMatch(m)) el.classList.add("isBye");
+      // ✅ só esconde BYE (99-0 / 0-99)
+      if (isBye(m)) el.classList.add("isBye");
 
       const w = winnerOf(m);
       const p1 = String(m.player1||"").trim();
@@ -536,8 +472,7 @@
 
       const chipText = (m.id || "—");
       const typeText = (m.type || "");
-
-      // ✅ não mostra o campo "draft" como texto (evita vazar URL na pill)
+      // não mostra o campo "draft" como texto (evita vazar URL na pill)
       const rightTopBase = typeText || "";
 
       const img = normalizeImgUrl(m.draft_img);
@@ -549,29 +484,29 @@
         : "VS";
 
       el.innerHTML = `
-          <div class="m-top">
-            <span class="chip">${chipText}</span>
-            <span>${rightTopBase}</span>
+        <div class="m-top">
+          <span class="chip">${chipText}</span>
+          <span>${rightTopBase}</span>
+        </div>
+
+        <div class="m-body">
+          <div class="p" title="${p1}">
+            ${p1Win ? '<span class="winmark"></span>' : ''}
+            <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p1 || "—"}</span>
           </div>
-        
-          <div class="m-body">
-            <div class="p" title="${p1}">
-              ${p1Win ? '<span class="winmark"></span>' : ''}
-              <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p1 || "—"}</span>
-            </div>
-            <div class="vs">${scoreShown}</div>
-            <div class="p" style="justify-content:flex-end;text-align:right" title="${p2}">
-              <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p2 || "—"}</span>
-              ${p2Win ? '<span class="winmark"></span>' : ''}
-            </div>
+          <div class="vs">${scoreShown}</div>
+          <div class="p" style="justify-content:flex-end;text-align:right" title="${p2}">
+            <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p2 || "—"}</span>
+            ${p2Win ? '<span class="winmark"></span>' : ''}
           </div>
-        
-          ${hasImg ? `
-            <div class="draftTip">
-              <img src="${img}" alt="Draft da partida" loading="lazy" />
-            </div>
-          ` : ``}
-        `;
+        </div>
+
+        ${hasImg ? `
+          <div class="draftTip">
+            <img src="${img}" alt="Draft da partida" loading="lazy" />
+          </div>
+        ` : ``}
+      `;
 
       return el;
     }
@@ -599,178 +534,155 @@
       });
     }
 
-function layout(rounds){
-  roundsEls.forEach(r => [...r.querySelectorAll(".match")].forEach(n => n.remove()));
-  wires.innerHTML = "";
+    function layout(rounds){
+      roundsEls.forEach(r => [...r.querySelectorAll(".match")].forEach(n => n.remove()));
+      wires.innerHTML = "";
 
-  const css = getComputedStyle(document.documentElement);
-  const colW  = parseFloat(css.getPropertyValue("--colW"));
-  const boxH  = parseFloat(css.getPropertyValue("--boxH"));
-  const gapR1 = parseFloat(css.getPropertyValue("--gapR1"));
+      const css = getComputedStyle(document.documentElement);
+      const colW  = parseFloat(css.getPropertyValue("--colW"));
+      const boxH  = parseFloat(css.getPropertyValue("--boxH"));
+      const gapR1 = parseFloat(css.getPropertyValue("--gapR1"));
 
-  const padX = 14;
-  const topY = 14 + 26; // topo + área do título da coluna
-  const usableH = bracket.clientHeight - 14 - 12 - 26 - 20;
+      const padX = 14;
+      const topY = 14 + 26;
+      const usableH = bracket.clientHeight - 14 - 12 - 26 - 20;
 
-  // posicionamento horizontal das colunas
-  const totalW = (colW * 5) + (36 * 4);
-  const startX = Math.max(padX, (bracket.clientWidth - totalW)/2);
-  const gapX = 36;
+      const totalW = (colW * 5) + (36 * 4);
+      const startX = Math.max(padX, (bracket.clientWidth - totalW)/2);
+      const gapX = 36;
 
-  roundsEls.forEach((col, i)=>{
-    col.style.left = (startX + i*(colW+gapX)) + "px";
-  });
+      roundsEls.forEach((col, i)=>{
+        col.style.left = (startX + i*(colW+gapX)) + "px";
+      });
 
-  // Round 1: empilha e centraliza verticalmente
-  const r1Count = rounds[0].length;
-  const r1Total = (r1Count * boxH) + ((r1Count - 1) * gapR1);
-  const baseY = Math.max(topY, topY + (usableH - r1Total)/2);
+      const r1Count = rounds[0].length;
+      const r1Total = (r1Count * boxH) + ((r1Count - 1) * gapR1);
+      const baseY = Math.max(topY, topY + (usableH - r1Total)/2);
 
-  // guarda centros Y por round (para calcular rounds seguintes)
-  const centers = [[],[],[],[],[]];
-  const nodes   = [[],[],[],[],[]];
+      const centers = [[],[],[],[],[]];
+      const nodes   = [[],[],[],[],[]];
 
-  // R1
-  for (let i=0; i<r1Count; i++){
-    const el = makeMatchEl(rounds[0][i]);
-    const y  = baseY + i*(boxH + gapR1);
-    el.style.top = y + "px";
-    roundsEls[0].appendChild(el);
+      // R1
+      for (let i=0; i<r1Count; i++){
+        const el = makeMatchEl(rounds[0][i]);
+        const y  = baseY + i*(boxH + gapR1);
+        el.style.top = y + "px";
+        roundsEls[0].appendChild(el);
 
-    nodes[0].push(el);
-    centers[0].push(y + boxH/2); // ✅ centro
-  }
+        nodes[0].push(el);
+        centers[0].push(y + boxH/2);
+      }
 
-  // R2..R5: cada match fica no meio dos dois “filhos”
-  for (let r=1; r<5; r++){
-    const count = rounds[r].length;
+      // R2..R5: centro entre os dois filhos
+      for (let r=1; r<5; r++){
+        const count = rounds[r].length;
 
-    for (let i=0; i<count; i++){
-      const childA = centers[r-1][i*2];
-      const childB = centers[r-1][i*2 + 1];
+        for (let i=0; i<count; i++){
+          const childA = centers[r-1][i*2];
+          const childB = centers[r-1][i*2 + 1];
 
-      // se faltar filho (ex: dados incompletos), cai num default seguro
-      const cy = (childA !== undefined && childB !== undefined)
-        ? (childA + childB)/2
-        : (centers[r-1][i] ?? (baseY + boxH/2));
+          const cy = (childA !== undefined && childB !== undefined)
+            ? (childA + childB)/2
+            : (centers[r-1][i] ?? (baseY + boxH/2));
 
-      const y = cy - boxH/2;
+          const y = cy - boxH/2;
 
-      const el = makeMatchEl(rounds[r][i]);
-      el.style.top = y + "px";
-      roundsEls[r].appendChild(el);
+          const el = makeMatchEl(rounds[r][i]);
+          el.style.top = y + "px";
+          roundsEls[r].appendChild(el);
 
-      nodes[r].push(el);
-      centers[r].push(cy);
+          nodes[r].push(el);
+          centers[r].push(cy);
+        }
+      }
+
+      return nodes;
     }
-  }
-
-  return nodes;
-}
 
     // SVG wires corrigidos pro SCALE (zoom 80%) + pular BYE
-function drawWires(nodes){
-  wires.innerHTML = "";
+    function drawWires(nodes){
+      wires.innerHTML = "";
 
-  const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--uiScale")) || 1;
-  wires.setAttribute("viewBox", `0 0 ${bracket.clientWidth} ${bracket.clientHeight}`);
+      const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--uiScale")) || 1;
+      wires.setAttribute("viewBox", `0 0 ${bracket.clientWidth} ${bracket.clientHeight}`);
 
-  const bracketRect = bracket.getBoundingClientRect();
+      const bracketRect = bracket.getBoundingClientRect();
 
-  function centerPoint(el, side){
-    const r = el.getBoundingClientRect();
-    const xVisual = (side === "left") ? (r.left - bracketRect.left) : (r.right - bracketRect.left);
-    const yVisual = (r.top - bracketRect.top) + (r.height/2);
-    return { x: xVisual / scale, y: yVisual / scale };
-  }
-
-  const stroke  = "rgba(11,18,32,.20)";
-  const stroke2 = "rgba(11,18,32,.12)";
-
-  // desenha o “H” normal (dois filhos)
-  function drawPair(child1, child2, parent){
-    const pL  = centerPoint(parent, "left");
-    const c1R = centerPoint(child1, "right");
-    const c2R = centerPoint(child2, "right");
-
-    const midX = (c1R.x + pL.x) / 2;
-
-    const d  = `M ${c1R.x} ${c1R.y} L ${midX} ${c1R.y} L ${midX} ${c2R.y} L ${c2R.x} ${c2R.y}`;
-    const d2 = `M ${midX} ${(c1R.y+c2R.y)/2} L ${pL.x} ${pL.y}`;
-
-    const path = document.createElementNS("http://www.w3.org/2000/svg","path");
-    path.setAttribute("d", d);
-    path.setAttribute("fill","none");
-    path.setAttribute("stroke", stroke2);
-    path.setAttribute("stroke-width","2");
-    path.setAttribute("stroke-linecap","round");
-    path.setAttribute("stroke-linejoin","round");
-
-    const path2 = document.createElementNS("http://www.w3.org/2000/svg","path");
-    path2.setAttribute("d", d2);
-    path2.setAttribute("fill","none");
-    path2.setAttribute("stroke", stroke);
-    path2.setAttribute("stroke-width","2");
-    path2.setAttribute("stroke-linecap","round");
-    path2.setAttribute("stroke-linejoin","round");
-
-    wires.appendChild(path);
-    wires.appendChild(path2);
-  }
-
-  // desenha linha simples (só 1 filho)
-  function drawSingle(child, parent){
-    const pL = centerPoint(parent, "left");
-    const cR = centerPoint(child, "right");
-
-    const midX = (cR.x + pL.x) / 2;
-
-    // child -> midX -> parent
-    const d = `M ${cR.x} ${cR.y} L ${midX} ${cR.y} L ${midX} ${pL.y} L ${pL.x} ${pL.y}`;
-
-    const path = document.createElementNS("http://www.w3.org/2000/svg","path");
-    path.setAttribute("d", d);
-    path.setAttribute("fill","none");
-    path.setAttribute("stroke", stroke);
-    path.setAttribute("stroke-width","2");
-    path.setAttribute("stroke-linecap","round");
-    path.setAttribute("stroke-linejoin","round");
-
-    wires.appendChild(path);
-  }
-
-  for (let r=1; r<5; r++){
-    for (let i=0; i<nodes[r].length; i++){
-      const parent = nodes[r][i];
-      const child1 = nodes[r-1][i*2];
-      const child2 = nodes[r-1][i*2+1];
-
-      // se o pai não existir, ignora
-      if (!parent) continue;
-
-      // filtra filhos inválidos / BYE
-      const valid1 = child1 && !child1.classList.contains("isBye");
-      const valid2 = child2 && !child2.classList.contains("isBye");
-
-      // 2 filhos válidos -> normal
-      if (valid1 && valid2){
-        drawPair(child1, child2, parent);
-        continue;
+      function centerPoint(el, side){
+        const r = el.getBoundingClientRect();
+        const xVisual = (side === "left") ? (r.left - bracketRect.left) : (r.right - bracketRect.left);
+        const yVisual = (r.top - bracketRect.top) + (r.height/2);
+        return { x: xVisual / scale, y: yVisual / scale };
       }
 
-      // só 1 válido -> linha simples
-      if (valid1 && !valid2){
-        drawSingle(child1, parent);
-        continue;
-      }
-      if (!valid1 && valid2){
-        drawSingle(child2, parent);
-        continue;
+      const stroke  = "rgba(11,18,32,.20)";
+      const stroke2 = "rgba(11,18,32,.12)";
+
+      function drawPair(child1, child2, parent){
+        const pL  = centerPoint(parent, "left");
+        const c1R = centerPoint(child1, "right");
+        const c2R = centerPoint(child2, "right");
+
+        const midX = (c1R.x + pL.x) / 2;
+
+        const d  = `M ${c1R.x} ${c1R.y} L ${midX} ${c1R.y} L ${midX} ${c2R.y} L ${c2R.x} ${c2R.y}`;
+        const d2 = `M ${midX} ${(c1R.y+c2R.y)/2} L ${pL.x} ${pL.y}`;
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+        path.setAttribute("d", d);
+        path.setAttribute("fill","none");
+        path.setAttribute("stroke", stroke2);
+        path.setAttribute("stroke-width","2");
+        path.setAttribute("stroke-linecap","round");
+        path.setAttribute("stroke-linejoin","round");
+
+        const path2 = document.createElementNS("http://www.w3.org/2000/svg","path");
+        path2.setAttribute("d", d2);
+        path2.setAttribute("fill","none");
+        path2.setAttribute("stroke", stroke);
+        path2.setAttribute("stroke-width","2");
+        path2.setAttribute("stroke-linecap","round");
+        path2.setAttribute("stroke-linejoin","round");
+
+        wires.appendChild(path);
+        wires.appendChild(path2);
       }
 
+      function drawSingle(child, parent){
+        const pL = centerPoint(parent, "left");
+        const cR = centerPoint(child, "right");
+
+        const midX = (cR.x + pL.x) / 2;
+        const d = `M ${cR.x} ${cR.y} L ${midX} ${cR.y} L ${midX} ${pL.y} L ${pL.x} ${pL.y}`;
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+        path.setAttribute("d", d);
+        path.setAttribute("fill","none");
+        path.setAttribute("stroke", stroke);
+        path.setAttribute("stroke-width","2");
+        path.setAttribute("stroke-linecap","round");
+        path.setAttribute("stroke-linejoin","round");
+
+        wires.appendChild(path);
+      }
+
+      for (let r=1; r<5; r++){
+        for (let i=0; i<nodes[r].length; i++){
+          const parent = nodes[r][i];
+          const child1 = nodes[r-1][i*2];
+          const child2 = nodes[r-1][i*2+1];
+
+          if (!parent) continue;
+
+          const valid1 = child1 && !child1.classList.contains("isBye");
+          const valid2 = child2 && !child2.classList.contains("isBye");
+
+          if (valid1 && valid2){ drawPair(child1, child2, parent); continue; }
+          if (valid1 && !valid2){ drawSingle(child1, parent); continue; }
+          if (!valid1 && valid2){ drawSingle(child2, parent); continue; }
+        }
+      }
     }
-  }
-}
 
     async function loadAndRender(){
       try{
@@ -782,18 +694,14 @@ function drawWires(nodes){
           hint.textContent = `Fonte: planilha publicada • ${expectedMatches} partidas`;
         }
 
-const r1 = padTo(sliceMatches(all, ...ranges.r1), 16);
-const r2 = padTo(sliceMatches(all, ...ranges.r2), 8);
-const r3 = padTo(sliceMatches(all, ...ranges.r3), 4);
-const r4 = padTo(sliceMatches(all, ...ranges.r4), 2);
-const r5 = padTo(sliceMatches(all, ...ranges.r5), 1);
+        const r1 = padTo(sliceMatches(all, ...ranges.r1), 16);
+        const r2 = padTo(sliceMatches(all, ...ranges.r2), 8);
+        const r3 = padTo(sliceMatches(all, ...ranges.r3), 4);
+        const r4 = padTo(sliceMatches(all, ...ranges.r4), 2);
+        const r5 = padTo(sliceMatches(all, ...ranges.r5), 1);
 
-const rounds = propagateRounds([r1,r2,r3,r4,r5]);
+        const nodes = layout([r1,r2,r3,r4,r5]);
 
-const nodes = layout(rounds);
-
-
-        // desenha wires depois do layout estabilizar
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             drawWires(nodes);
