@@ -8,7 +8,9 @@
   <meta name="description"
     content="A liga independente do Age of Empires IV no Brasil. Independente. Competitiva. Brasileira." />
 
-  <link rel="stylesheet" href="./styles.css" />
+<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="./theme-aoe4.css">
+
 </head>
 
 <body>
@@ -25,12 +27,13 @@
     </a>
 
     <nav class="nav">
-      <a href="https://lbi-draft.onrender.com/index.html" class="nav-cta">Draft</a>
-      <a href="#quem-somos">Quem somos</a>
+
+	  <a href="#quem-somos">Organização</a>
       <a href="#calendario">Calendário</a>
-      <a href="#organizacao">Organização</a>
       <a href="#parcerias">Parcerias</a>
-      <a href="#contato" class="nav-cta">Contato</a>
+      <a href="#contato">Contato</a>
+	  <a href="https://lbi-draft.onrender.com/index.html" class="nav-cta">Draft</a>
+	  <a href="https://lbi-draft.onrender.com/index.html" class="nav-cta">Painel</a>
     </nav>
 
     <button class="nav-toggle" aria-label="Abrir menu"
@@ -44,8 +47,7 @@
   <div class="mobile-menu">
     <a href="#quem-somos" onclick="document.body.classList.remove('menu-open')">Quem somos</a>
     <a href="#calendario" onclick="document.body.classList.remove('menu-open')">Calendário</a>
-    <a href="#organizacao" onclick="document.body.classList.remove('menu-open')">Organização</a>
-    <a href="#parcerias" onclick="document.body.classList.remove('menu-open')">Parcerias</a>
+        <a href="#parcerias" onclick="document.body.classList.remove('menu-open')">Parcerias</a>
     <a href="#contato" onclick="document.body.classList.remove('menu-open')">Contato</a>
   </div>
 </header>
@@ -87,46 +89,107 @@
 </section>
 
 <!-- =========================
-     2) QUEM SOMOS
+     2) SOBRE (Quem somos + Organização) — CARROSSEL
 ========================= -->
 <section id="quem-somos" class="section bg-solid-1">
   <div class="overlay overlay-soft"></div>
 
   <div class="wrap content">
     <header class="section-head">
-      <h2 class="title">Quem somos</h2>
-      <p class="lead">
-        A LBI nasce da comunidade e para a comunidade de Age of Empires IV.
-      </p>
+      <h2 class="title">Sobre a LBI</h2>
+      <p class="lead">A LBI nasce da comunidade e para a comunidade de Age of Empires IV.</p>
     </header>
+    <div class="about-tabs" data-tabs>
+      <div class="tabbar" role="tablist" aria-label="Sobre a LBI">
+        <button class="tab is-active" type="button" role="tab" aria-selected="true" data-tab="quem">Quem somos</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-tab="org">Organização e estrutura</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-tab="dir">Diretoria 26/27</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-tab="assoc">Associados Fundadores</button>
+      </div>
 
-    <div class="panel">
-      <p class="text">
-        A Liga Brasileira Independente (LBI) é uma iniciativa criada para transformar a paixão pelo Age of Empires IV em um cenário competitivo estruturado, sustentável e de longo prazo no Brasil.
-      </p>
+      <div class="tabpanels">
+        <article class="tabpanel is-active" role="tabpanel" data-panel="quem">
+          <div class="panel">
+            <p class="text">
+              A Liga Brasileira Independente (LBI) é uma iniciativa criada para transformar a paixão pelo Age of Empires IV em um cenário competitivo estruturado, sustentável e de longo prazo no Brasil.
+            </p>
 
-      <p class="text">
-        Nosso objetivo é oferecer campeonatos recorrentes, calendário anual, transparência organizacional
-        e um ambiente competitivo saudável, criando oportunidades reais de crescimento para atletas e
-        visibilidade para marcas que acreditam no potencial do cenário.
-      </p>
+            <p class="text">
+              Nosso objetivo é oferecer campeonatos recorrentes, calendário anual, transparência organizacional e um ambiente competitivo saudável, criando oportunidades reais de crescimento para atletas e visibilidade para marcas que acreditam no potencial do cenário.
+            </p>
 
-      <p class="text">
-        Somos uma organização independente que atua na conexão entre jogadores, organizadores de eventos, criadores de conteúdo e apoiadores, com o objetivo de profissionalizar o competitivo nacional e oferecer um ambiente saudável, transparente e confiável para todos os envolvidos.
-      </p>
-      
-      <p class="text">
-        Nosso foco está na criação de campeonatos recorrentes, na construção de um calendário anual previsível e no fortalecimento da identidade competitiva brasileira dentro do Age of Empires IV. Trabalhamos para gerar oportunidades reais de crescimento para atletas e visibilidade qualificada para marcas que acreditam no potencial do cenário.
-      </p>
+            <p class="text">
+              Somos uma organização independente que atua na conexão entre jogadores, organizadores de eventos, criadores de conteúdo e apoiadores, com o objetivo de profissionalizar o competitivo nacional e oferecer um ambiente saudável, transparente e confiável para todos os envolvidos.
+            </p>
 
-      <div class="pill-row">
-        <span class="pill">Comunidade</span>
-        <span class="pill">Organização</span>
-        <span class="pill">Competição</span>
-        <span class="pill">Transparência</span>
-        <span class="pill">Longo prazo</span>
+            <div class="pill-row">
+              <span class="pill">Comunidade</span>
+              <span class="pill">Organização</span>
+              <span class="pill">Competição</span>
+              <span class="pill">Transparência</span>
+              <span class="pill">Longo prazo</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="tabpanel" role="tabpanel" data-panel="org">
+          <div class="panel">
+            <p class="text">
+              A LBI surge para solucionar um dos principais desafios do cenário competitivo brasileiro de Age of Empires IV: a falta de uma estrutura centralizada, organizada e confiável para planejar eventos, padronizar regras e viabilizar apoio contínuo.
+            </p>
+
+            <p class="text">
+              Atuamos como um núcleo organizador independente, responsável por estruturar calendários, definir regulamentos oficiais, centralizar inscrições, gerenciar premiações e garantir transparência em todos os processos envolvidos nas competições.
+            </p>
+
+            <p class="text">
+              Para jogadores: mais eventos, melhor organização e oportunidades reais de evolução ao longo do ano. Para patrocinadores e apoiadores: previsibilidade, credibilidade, métricas claras e exposição consistente.
+            </p>
+
+            <p class="text">
+              A LBI não é apenas um organizador de torneios — é a base para um ecossistema competitivo sustentável de Age of Empires IV no Brasil.
+            </p>
+          </div>
+        </article>
+
+        <article class="tabpanel" role="tabpanel" data-panel="dir">
+          <div class="board-grid">
+            <div class="person-card">
+              <span class="person-role">Presidente</span>
+              <span class="person-name">GUILHERME <span class="nick">“AZX”</span> ESTEVES</span>
+            </div>
+
+            <div class="person-card">
+              <span class="person-role">Secretário</span>
+              <span class="person-name">RAFAEL <span class="nick">“RAFACOMANDO”</span> ACCIARI</span>
+            </div>
+
+            <div class="person-card">
+              <span class="person-role">Tesoureiro</span>
+              <span class="person-name">WALTER <span class="nick">“BITTENCA”</span> BITTENCOURT</span>
+            </div>
+
+            <div class="person-card">
+              <span class="person-role">Conselheiro Fiscal</span>
+              <span class="person-name">WESLEY <span class="nick">“WESLÃO”</span> DE LIMA</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="tabpanel" role="tabpanel" data-panel="assoc">
+          <div class="panel">
+            <div class="founders-list">
+              <div class="founder">VITOR <span class="nick">“VICENTIN”</span> VICENTIN</div>
+              <div class="founder">OTAVIO <span class="nick">“GREG”</span> ALVES</div>
+              <div class="founder">JOSÉ <span class="nick">“YDRAGONBORN”</span> JUNIOR</div>
+              <div class="founder">CAIO <span class="nick">“CAIOFORA”</span> VIEIRA</div>
+              <div class="founder">ALESSANDRO <span class="nick">“ALEDROX”</span> LIMA</div>
+            </div>
+          </div>
+        </article>
       </div>
     </div>
+
   </div>
 </section>
 
@@ -144,7 +207,7 @@
       </p>
     </header>
 
-    <div class="events-carousel" aria-label="Carrossel de eventos">
+    <div class="events-carousel" aria-label="Carrossel de eventos" data-carousel>
       <button class="carousel-btn prev" type="button" aria-label="Evento anterior" data-carousel-prev>
         ‹
       </button>
@@ -252,40 +315,28 @@
     </div>
   </div>
 </section>
-
-
 <!-- =========================
-     4) ORGANIZAÇÃO
+     4.5) patro
 ========================= -->
-<section id="organizacao" class="section bg-solid-2">
-  <div class="overlay overlay-soft"></div>
 
+<section id="patrocinadores" class="section bg-solid-2">
   <div class="wrap content">
+
     <header class="section-head">
-      <h2 class="title">Organização e estrutura</h2>
-      <p class="lead">
-        Um núcleo independente para organizar, sustentar e profissionalizar o competitivo.
-      </p>
+      <h2 class="title">Patrocinadores</h2>
+      <p class="lead">Quem já está construindo a temporada com a LBI.</p>
     </header>
 
-    <div class="panel">
-      <p class="text">
-        A LBI surge para solucionar um dos principais desafios do cenário competitivo brasileiro de Age of Empires IV: a falta de uma estrutura centralizada, organizada e confiável para planejar eventos, padronizar regras e viabilizar apoio contínuo.
-      </p>
-
-      <p class="text">
-        Atuamos como um núcleo organizador independente, responsável por estruturar calendários, definir regulamentos oficiais, centralizar inscrições, gerenciar premiações e garantir transparência em todos os processos envolvidos nas competições.
-      </p>
-
-      <p class="text">
-        Para os jogadores, isso significa mais eventos, melhor organização e oportunidades reais de evolução competitiva ao longo do ano. Para patrocinadores e apoiadores, representa previsibilidade, credibilidade, métricas claras e exposição consistente junto a uma comunidade altamente engajada.
-      </p>
-      <p class="text">
-        A LBI não é apenas um organizador de torneios — é a base para um ecossistema competitivo sustentável de Age of Empires IV no Brasil.
-      </p>
+    <div class="sponsor-hero">
+      <img src="./assets/partner/p1.png" alt="OneX Data Centers" class="sponsor-hero-logo active">
+      <img src="./assets/partner/p2.png" alt="OneX Data Centers" class="sponsor-hero-logo">
+      <img src="./assets/partner/p3.png" alt="OneX Data Centers" class="sponsor-hero-logo">
     </div>
+
   </div>
 </section>
+
+
 
 <!-- =========================
      5) PARCERIAS
@@ -368,5 +419,24 @@
 </script>
 
 <script src="./carousel.js"></script>
+<script>
+  // Abas: Sobre a LBI
+  document.querySelectorAll("[data-tabs]").forEach((root) => {
+    const tabs = root.querySelectorAll("[data-tab]");
+    const panels = root.querySelectorAll("[data-panel]");
+    tabs.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-tab");
+        tabs.forEach((t) => {
+          const active = t === btn;
+          t.classList.toggle("is-active", active);
+          t.setAttribute("aria-selected", active ? "true" : "false");
+        });
+        panels.forEach((p) => p.classList.toggle("is-active", p.getAttribute("data-panel") === id));
+      });
+    });
+  });
+</script>
 </body>
+
 </html>

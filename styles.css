@@ -659,3 +659,379 @@ body.menu-open .mobile-menu{ display:block; }
 .event-row .event-content p{
   flex: 1;
 }
+
+/* =========================
+   OVERLAYS — ajuste fino nas seções com imagem (3 e 5)
+   Objetivo: manter a imagem viva e dar legibilidade no texto
+========================= */
+
+/* Calendário (bg3.png) — scrim escuro no lado do texto, imagem viva no resto */
+.bg-calendar .overlay-soft{
+  background:
+    linear-gradient(
+      to right,
+      rgba(11,18,32,.88) 0%,
+      rgba(11,18,32,.70) 45%,
+      rgba(11,18,32,.35) 70%,
+      rgba(11,18,32,.10) 100%
+    );
+}
+
+/* Parcerias (bg5.png) — menos “branco”, mais contraste e foco no painel */
+.bg-sponsors .overlay-soft{
+  background:
+    linear-gradient(
+      to right,
+      rgba(11,18,32,.90) 0%,
+      rgba(11,18,32,.72) 40%,
+      rgba(11,18,32,.40) 70%,
+      rgba(11,18,32,.14) 100%
+    );
+}
+
+/* Painel “glass” para textos em cima de imagem (fica muito AoE4World) */
+.bg-calendar .panel,
+.bg-sponsors .panel{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: var(--radius);
+  padding: 18px 18px;
+}
+
+/* Na seção 5 seu texto estava “solto”. Vamos deixar consistente e legível */
+.bg-sponsors .text,
+.bg-calendar .text,
+.bg-sponsors .lead,
+.bg-calendar .lead{
+  color: rgba(230,236,255,.78) !important;
+  text-shadow: 0 8px 18px rgba(0,0,0,.28);
+}
+/* =========================
+   DIRETORIA — Abas + Grid (sem carrossel)
+========================= */
+
+.board-tabs{
+  margin-top: 14px;
+  max-width: 1100px;
+}
+
+/* grid dos cards da diretoria */
+.board-grid{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* lista de associados */
+.founders-list{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.founder{
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  color: rgba(242,244,248,.85);
+  font-weight: 800;
+}
+
+/* responsivo */
+@media (max-width: 980px){
+  .board-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 620px){
+  .board-grid{ grid-template-columns: 1fr; }
+  .founders-list{ grid-template-columns: 1fr; }
+}
+
+/* =========================
+   SOBRE — Abas (substitui o carrossel)
+========================= */
+
+.about-tabs{
+  margin-top: 16px;
+  max-width: 980px;
+}
+
+.tabbar{
+  display: inline-flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  backdrop-filter: blur(8px);
+}
+
+.tab{
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 900;
+  color: rgba(230,236,255,.80);
+  background: transparent;
+}
+
+.tab.is-active{
+  color: #111318;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+}
+
+.tabpanels{
+  margin-top: 12px;
+}
+
+.tabpanel{
+  display: none;
+  animation: tabFade .18s ease;
+}
+
+.tabpanel.is-active{
+  display: block;
+}
+
+@keyframes tabFade{
+  from{ opacity: .3; transform: translateY(4px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+
+/* =========================
+   DIRETORIA — carrossel mais discreto
+========================= */
+
+.people-carousel{
+  display: grid;
+  grid-template-columns: 52px 1fr 52px;
+  align-items: center;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.people-track{
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  display: flex;
+  gap: 14px;
+  padding: 2px;
+  scrollbar-width: none;
+}
+.people-track::-webkit-scrollbar{ display:none; }
+
+.person-card{
+  flex: 0 0 auto;
+  width: 320px;
+  scroll-snap-align: start;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: var(--radius);
+  padding: 16px 16px;
+}
+
+.person-role{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: .2px;
+
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(245,200,75,.12);
+  border: 1px solid rgba(245,200,75,.35);
+  color: rgba(245,200,75,.95);
+}
+
+.person-name{
+  display: block;
+  margin-top: 10px;
+  font-weight: 900;
+  color: rgba(230,236,255,.92);
+  line-height: 1.25;
+}
+
+/* Setas menores e mais “clean” na Diretoria */
+.people-carousel .carousel-btn{
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  color: rgba(230,236,255,.85);
+  box-shadow: none;
+  font-size: 22px;
+}
+
+.people-carousel .carousel-btn:hover{
+  background: rgba(255,255,255,.10);
+  transform: none;
+}
+
+/* Mobile: abas empilham e diretoria vira swipe sem setas */
+@media (max-width: 720px){
+  .people-carousel{
+    grid-template-columns: 1fr;
+  }
+  .people-carousel .carousel-btn{
+    display: none;
+  }
+  .person-card{
+    width: 78vw;
+  }
+}
+
+/* Grid da diretoria dentro da aba */
+.board-grid{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+@media (max-width: 980px){
+  .board-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 620px){
+  .board-grid{ grid-template-columns: 1fr; }
+}
+
+/* Lista de fundadores */
+.founders-list{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 10px;
+}
+
+@media (max-width: 620px){
+  .founders-list{ grid-template-columns: 1fr; }
+}
+
+.founder{
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  color: rgba(242,244,248,.85);
+  font-weight: 850;
+}
+
+/* Nick (amarelo/ouro) dentro do nome */
+.nick{ color: var(--accent); font-weight: 950; }
+
+/* =========================
+   SOBRE > DIRETORIA / FUNDADORES — mais destaque e organização
+========================= */
+
+/* Tabs: um pouco mais “premium” */
+.about-tabs .tabbar{
+  width: fit-content;
+  max-width: 100%;
+  gap: 8px;
+  padding: 8px;
+}
+.about-tabs .tab{
+  padding: 10px 16px;
+  font-weight: 900;
+  letter-spacing: .2px;
+}
+
+/* Grid da diretoria: mais respiro */
+.board-grid{
+  gap: 14px;
+}
+
+/* CARD: diretoria (person-card) */
+.person-card{
+  padding: 18px 18px !important;
+  border-radius: 16px;
+  background:
+    radial-gradient(900px 220px at 20% 0%, rgba(245,200,75,.10), transparent 55%),
+    linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02)),
+    #141821 !important;
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 16px 34px rgba(0,0,0,.40);
+  transition: transform .12s ease, border-color .12s ease, background .12s ease;
+}
+.person-card:hover{
+  transform: translateY(-2px);
+  border-color: rgba(245,200,75,.30);
+}
+
+/* Cargo: menor e mais “badge” */
+.person-role{
+  font-size: 11px !important;
+  padding: 6px 10px !important;
+  letter-spacing: .3px;
+}
+
+/* Nome: mais destaque */
+.person-name{
+  margin-top: 12px !important;
+  font-size: 18px !important;
+  font-weight: 1000 !important;
+  line-height: 1.15;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.96) !important;
+  text-shadow: 0 10px 20px rgba(0,0,0,.35);
+}
+
+/* Nick ouro: mais “chamativo” */
+.nick{
+  color: var(--accent) !important;
+  font-weight: 1000;
+  text-shadow: 0 10px 24px rgba(245,200,75,.18);
+}
+
+/* =========================
+   FUNDADORES — virar “cards” de verdade
+========================= */
+
+.founders-list{
+  gap: 12px !important;
+}
+
+/* deixa cada founder com cara de card e melhora leitura */
+.founder{
+  padding: 14px 16px !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
+    rgba(20,24,33,.92) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: 0 14px 28px rgba(0,0,0,.35);
+  font-size: 16px;
+  font-weight: 950 !important;
+  text-transform: uppercase;
+  letter-spacing: .2px;
+}
+
+/* coloca uma “linha dourada” sutil no topo do founder */
+.founder{
+  position: relative;
+  overflow: hidden;
+}
+.founder::before{
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(245,200,75,.0), rgba(245,200,75,.55), rgba(245,200,75,.0));
+  opacity: .9;
+}
+
+/* responsivo: garante boa leitura */
+@media (max-width: 980px){
+  .person-name{ font-size: 17px !important; }
+  .founder{ font-size: 15px; }
+}
