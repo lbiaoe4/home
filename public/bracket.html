@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LBI • Bracket</title>
+  <link rel="stylesheet" href="/painel.css" />
+  <style>
+    body{padding:24px;}
+    .wrap{max-width:1400px;margin:0 auto;}
+    .topbar{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    .mut{opacity:.7}
+
+    /* Bracket canvas */
+    .bracketOuter{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,0.02);overflow:auto;}
+    .bracketInner{position:relative;padding:22px 22px 28px 22px;min-height:420px;}
+
+    .roundLabels{position:sticky;top:0;z-index:3;display:flex;gap:0;margin:-22px -22px 18px -22px;padding:16px 22px 10px 22px;
+      background:linear-gradient(180deg, rgba(12,16,24,0.98) 0%, rgba(12,16,24,0.85) 70%, rgba(12,16,24,0) 100%);
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(8px);
+    }
+    .roundLabels .lbl{flex:0 0 var(--colW);padding-right:var(--gap);font-weight:800;letter-spacing:.4px;font-size:12px;opacity:.85}
+
+    /* Pills */
+    .matchPill{position:absolute;width:var(--colW);border:1px solid rgba(255,255,255,0.10);border-radius:999px;
+      background:rgba(0,0,0,0.20);box-shadow:0 10px 30px rgba(0,0,0,0.25);
+      padding:10px 12px;}
+    .matchPill.done{border-color:rgba(46, 204, 113, 0.35);}
+    .matchPill.pending{border-color:rgba(255,255,255,0.10);}
+    .matchPill.bye{opacity:.55;}
+
+    .pillTop{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
+    .tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;opacity:.85;border:1px solid rgba(255,255,255,0.12);padding:2px 8px;border-radius:999px;}
+    .dot{width:7px;height:7px;border-radius:99px;background:rgba(46,204,113,0.9)}
+    .dot.pending{background:rgba(255,255,255,0.35)}
+    .dot.bye{background:rgba(241,196,15,0.85)}
+
+    .row{display:flex;align-items:center;justify-content:space-between;gap:10px;line-height:1.1;}
+    .name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:13px;}
+    .score{font-weight:900;font-size:13px;opacity:.9}
+    .row.muted .name,.row.muted .score{opacity:.65;font-weight:600}
+    .row.winner .name{opacity:1}
+
+    .draftLink{margin-top:8px;font-size:12px;opacity:.85}
+    .draftLink a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+
+    /* SVG lines */
+    #lines{position:absolute;inset:0;z-index:1;pointer-events:none;}
+    .line{fill:none;stroke:rgba(255,255,255,0.18);stroke-width:2;}
+    .line.done{stroke:rgba(241,196,15,0.35)}
+
+    /* layer above lines */
+    #matches{position:relative;z-index:2;}
+
+    @media (max-width: 900px){
+      body{padding:14px}
+      .wrap{max-width:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div style="width:10px;height:10px;border-radius:999px;background:var(--gold)"></div>
+          <div style="font-weight:800">LBI • Bracket</div>
+        </div>
+        <div class="mut" id="sub">Carregando...</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-end">
+        <label class="field" style="min-width:320px">
+          <span>Evento</span>
+          <select id="evt"></select>
+        </label>
+        <button class="btn btn--ghost" id="reload">Atualizar</button>
+      </div>
+    </div>
+
+    <div class="bracketOuter">
+      <div class="bracketInner" id="canvas" style="--colW: 260px; --gap: 140px;">
+        <div class="roundLabels" id="labels"></div>
+        <svg id="lines"></svg>
+        <div id="matches"></div>
+      </div>
+    </div>
+  </div>
+
+<script src="/bracket.js"></script>
+</body>
+</html>

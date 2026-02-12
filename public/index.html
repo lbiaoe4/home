@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Painel LBI</title>
+  <link rel="stylesheet" href="painel.css" />
+</head>
+<body>
+  <!-- Topbar (aparece após login) -->
+  <header class="topbar hidden" id="topbar">
+    <div class="brand">
+      <div class="brand__dot"></div>
+      <div class="brand__txt">
+        <div class="brand__title">LBI • Painel</div>
+        <div class="brand__sub" id="brandSub">Temporada</div>
+      </div>
+    </div>
+
+    <div class="topbar__right">
+      <div class="chip" id="chipUser">Usuário</div>
+      <div class="chip chip--points hidden" id="chipPoints">0 pts</div>
+      <button class="btn btn--ghost" id="btnLogout">Sair</button>
+    </div>
+  </header>
+
+  <!-- LOGIN -->
+  <main class="wrap" id="loginView">
+    <section class="card card--login">
+      <h1>Entrar no Painel</h1>
+      <p class="muted">
+        Versão local (temporária). Depois a gente substitui por autenticação segura.
+      </p>
+
+      <div class="grid">
+        <label class="field">
+          <span>Usuário</span>
+          <input id="loginUser" autocomplete="username" placeholder="ex: gui" />
+        </label>
+
+        <label class="field">
+          <span>Senha</span>
+          <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••" />
+        </label>
+      </div>
+
+      <div class="row" style="gap:14px; align-items:center; justify-content:flex-start; margin-top:6px">
+        <label style="display:flex; gap:8px; align-items:center; cursor:pointer">
+          <input type="checkbox" id="rememberUser" />
+          <span class="muted">Lembrar usuário</span>
+        </label>
+        <label style="display:flex; gap:8px; align-items:center; cursor:pointer">
+          <input type="checkbox" id="rememberPass" />
+          <span class="muted">Lembrar senha</span>
+        </label>
+      </div>
+
+      <div class="row">
+        <button class="btn" id="btnLogin">Entrar</button>
+        <button class="btn btn--ghost" id="btnSeed">Criar usuário admin de teste</button>
+      </div>
+
+      <div class="note" id="loginMsg"></div>
+
+      <details class="help">
+        <summary>Credenciais de teste (quando você clicar em “Criar usuário admin”)</summary>
+        <div class="muted">
+          Admin: <b>admin</b> / senha: <b>admin123</b><br/>
+          Usuário: <b>user</b> / senha: <b>user123</b>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <!-- APP (após login) -->
+  <main class="wrap hidden" id="appView">
+    <!-- MENU (ícones) -->
+    <nav class="tiles" id="tiles"></nav>
+
+    <!-- CONTEÚDOS -->
+    <section class="card hidden" id="sectionMeusDados"></section>
+    <section class="card hidden" id="sectionInscricoes"></section>
+    <section class="card hidden" id="sectionResultados"></section>
+
+    <section class="card hidden" id="sectionUsers"></section>
+    <section class="card hidden" id="sectionEventos"></section>
+    <section class="card hidden" id="sectionInscAdmin"></section>
+    <section class="card hidden" id="sectionResAdmin"></section>
+
+      <section class="card hidden" id="sectionSettings"></section>
+  </main>
+
+  <footer class="footer">
+    <span class="muted">LBI • Protótipo do Painel (localStorage)</span>
+  </footer>
+
+  <script src="auth.js"></script>
+  <script src="painel.js"></script>
+</body>
+</html>
