@@ -1,0 +1,403 @@
+/* =====================================================
+   LBI — AoE4World inspired theme
+   Dark / Competitive / Dashboard-like
+===================================================== */
+
+:root{
+  /* Base */
+  --bg: #0b1220;
+  --ink: #e6ecff;
+  --muted: rgba(230,236,255,.70);
+  --line: rgba(255,255,255,.10);
+
+  /* Accent (AoE4 gold) */
+  --accent: #f5c84b;
+  --accent2: #d9a62a;
+
+  /* Cards / surfaces */
+  --surface: #121f35;
+  --surface-2: #162844;
+
+  --radius: 14px;
+}
+
+/* =========================
+   BASE
+========================= */
+body{
+  background:
+    radial-gradient(1000px 700px at 15% 0%, rgba(245,200,75,.08), transparent 55%),
+    radial-gradient(900px 600px at 85% 25%, rgba(96,165,250,.10), transparent 60%),
+    var(--bg);
+  color: var(--ink);
+}
+
+/* textos */
+.text,
+.lead,
+.event-desc,
+.contact-value{
+  color: var(--muted) !important;
+}
+
+/* =========================
+   TOPBAR
+========================= */
+.topbar{
+  background: rgba(11,18,32,.82);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand-name{
+  color: var(--ink);
+}
+
+.nav a{
+  color: var(--muted);
+}
+.nav a:hover{
+  color: var(--accent);
+}
+
+/* CTA */
+.nav-cta{
+  background: rgba(245,200,75,.12);
+  border-color: rgba(245,200,75,.35);
+  color: var(--accent);
+}
+
+/* =========================
+   SEÇÕES INSTITUCIONAIS — DARK NEUTRO
+   (Sobre a LBI / Contato / Diretoria)
+========================= */
+
+/* fundo geral da seção */
+.section.bg-solid-1,
+.section.bg-solid-2,
+.section.bg-solid-3{
+  background:
+    radial-gradient(1200px 600px at 20% 0%, rgba(255,255,255,.04), transparent 60%),
+    linear-gradient(180deg, #0a0c10 0%, #0e1117 100%) !important;
+}
+
+/* remove qualquer overlay claro herdado */
+.section.bg-solid-1 .overlay,
+.section.bg-solid-2 .overlay,
+.section.bg-solid-3 .overlay{
+  background: none !important;
+}
+/* Painéis institucionais */
+.panel,
+.about-tabs .panel,
+.contact,
+.person-card{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
+    #141821 !important;
+
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 20px 40px rgba(0,0,0,.45);
+}
+/* Texto institucional */
+.section.bg-solid-1 .title,
+.section.bg-solid-2 .title,
+.section.bg-solid-3 .title{
+  color: #f2f4f8 !important;
+}
+
+.section.bg-solid-1 .lead,
+.section.bg-solid-2 .lead,
+.section.bg-solid-3 .lead{
+  color: rgba(242,244,248,.75) !important;
+}
+
+.section.bg-solid-1 .text,
+.section.bg-solid-2 .text,
+.section.bg-solid-3 .text{
+  color: rgba(242,244,248,.82) !important;
+}
+/* Tabs mais neutras (preto/cinza + ouro) */
+.tabbar{
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+.tab{
+  color: rgba(242,244,248,.65);
+}
+
+.tab.is-active{
+  background: linear-gradient(135deg, #f5c84b, #d9a62a);
+  color: #0b0e13;
+}
+/* Cards de contato */
+.contact-kicker{
+  color: rgba(242,244,248,.95);
+}
+
+.contact-value{
+  color: rgba(242,244,248,.70);
+}
+
+/* =========================
+   HERO
+========================= */
+.hero-title{
+  color: #fff;
+}
+
+.hero-subtitle{
+  color: rgba(255,255,255,.82);
+}
+
+.hero-mini{
+  color: rgba(255,255,255,.75);
+}
+
+/* =========================
+   BUTTONS
+========================= */
+.btn{
+  background: rgba(255,255,255,.04);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.btn:hover{
+  background: rgba(255,255,255,.08);
+}
+
+.btn-primary{
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #111318;
+}
+
+/* =========================
+   PANELS / CARDS
+========================= */
+.panel,
+.contact,
+.event-card{
+  background: linear-gradient(
+      180deg,
+      rgba(255,255,255,.04),
+      rgba(255,255,255,.02)
+    ),
+    var(--surface);
+  border: 1px solid var(--line);
+}
+
+.event-card:hover{
+  border-color: rgba(245,200,75,.35);
+}
+
+/* =========================
+   TAGS / PILLS
+========================= */
+.pill,
+.event-tags .tag{
+  background: rgba(245,200,75,.12);
+  border-color: rgba(245,200,75,.35);
+  color: var(--accent);
+}
+
+/* =========================
+   FOOTER
+========================= */
+.footer{
+  color: rgba(255,255,255,.55);
+}
+
+/* =========================
+   DIRETORIA — layout horizontal (não empilhado)
+========================= */
+
+/* Grid da diretoria */
+.board-grid{
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+/* garante largura igual e presença */
+.board-grid .person-card{
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Tablet */
+@media (max-width: 1100px){
+  .board-grid{
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px){
+  .board-grid{
+    grid-template-columns: 1fr;
+  }
+}
+.person-role{
+  margin-bottom: 8px;
+}
+
+.person-name{
+  text-align: left;
+}
+.person-card{
+  text-align: center;
+}
+/* =========================
+   SOBRE A LBI — container com borda reforçada
+   (mesmo peso visual de Parcerias)
+========================= */
+
+/* painel principal do Sobre */
+#quem-somos .panel{
+  position: relative;
+  border-radius: 20px;
+  padding: 22px 24px;
+
+  /* borda mais presente */
+  border: 2px solid rgba(255,255,255,.14);
+
+  /* fundo */
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03)),
+    #141821;
+
+  /* profundidade */
+  box-shadow:
+    0 30px 60px rgba(0,0,0,.55),
+    inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+/* “linha institucional” dourada no topo (igual Parcerias, mas sutil) */
+#quem-somos .panel::before{
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 18px;
+  right: 18px;
+  height: 2px;
+
+  background: linear-gradient(
+    90deg,
+    rgba(245,200,75,0),
+    rgba(245,200,75,.65),
+    rgba(245,200,75,0)
+  );
+
+  opacity: .9;
+}
+
+/* =========================
+   PATROCINADORES — marquee automático
+========================= */
+
+.sponsor-marquee{
+  margin-top: 14px;
+  border-radius: 18px;
+  border: 2px solid rgba(255,255,255,.12);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
+    #141821;
+  box-shadow: 0 24px 50px rgba(0,0,0,.50);
+  overflow: hidden;
+  padding: 14px 0;
+}
+
+.marquee-track{
+  display: flex;
+  width: max-content;
+  animation: marquee 22s linear infinite;
+}
+
+.sponsor-marquee:hover .marquee-track{
+  animation-play-state: paused;
+}
+
+.marquee-row{
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  padding: 0 26px;
+}
+
+/* “slot” do logo (uniformiza tamanhos diferentes) */
+.sponsor-logo{
+  height: 54px;
+  width: 200px;         /* controla “largura visual” */
+  object-fit: contain;  /* mantém proporção */
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,.25));
+  opacity: .92;
+}
+
+.sponsor-logo:hover{
+  opacity: 1;
+}
+
+/* animação */
+@keyframes marquee{
+  from{ transform: translateX(0); }
+  to{ transform: translateX(-50%); } /* como duplicamos a lista, -50% fecha certinho */
+}
+
+/* responsivo */
+@media (max-width: 720px){
+  .sponsor-logo{
+    height: 46px;
+    width: 160px;
+  }
+  .marquee-track{ animation-duration: 18s; }
+}
+/* =========================
+   PATROCINADOR HERO (1 por vez)
+========================= */
+
+.sponsor-hero{
+  position: relative;
+  height: 200px;               /* controla o “impacto visual” */
+  margin-top: 20px;
+  border-radius: 20px;
+  border: 2px solid rgba(255,255,255,.14);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
+    #141821;
+  box-shadow: 0 30px 60px rgba(0,0,0,.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.sponsor-hero-logo{
+  position: absolute;
+  max-height: 400px;           /* TAMANHO DO LOGO */
+  max-width: 600px;
+  object-fit: contain;
+  opacity: 0;
+  transform: scale(.96);
+  transition: opacity .8s ease, transform .8s ease;
+  filter: drop-shadow(0 14px 26px rgba(0,0,0,.35));
+}
+
+.sponsor-hero-logo.active{
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* mobile */
+@media (max-width: 720px){
+  .sponsor-hero{
+    height: 160px;
+  }
+  .sponsor-hero-logo{
+    max-height: 90px;
+    max-width: 280px;
+  }
+}
