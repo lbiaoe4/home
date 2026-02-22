@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>LBI • Templates de Draft</title>
+
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../theme-aoe4.css">
+  <link rel="stylesheet" href="./painel.css">
+
+  <style>
+    /* pequenos ajustes só para esta tela */
+    .tpl-shell{ grid-template-columns: 420px 1fr; }
+    @media (max-width: 980px){ .tpl-shell{ grid-template-columns: 1fr; } }
+    .tpl-list{ max-height: calc(100vh - 220px); overflow:auto; }
+    .tpl-item{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px; border-top:1px solid rgba(255,255,255,.06); }
+    .tpl-item:hover{ background: rgba(255,255,255,.03); }
+    .tpl-item .name{ font-weight: 1000; }
+    .tpl-item .id{ font-size:12px; color: rgba(230,236,255,.65); }
+    .tpl-actions{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    .btn2.sm{ padding: 9px 12px; font-size: 12px; }
+    .pillrow{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .grid3{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
+    @media (max-width: 980px){ .grid3{ grid-template-columns: 1fr; } }
+    .bo-card{ padding: 12px; border-radius: 16px; border: 1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.03); }
+    .bo-title{ font-weight: 1000; margin-bottom: 10px; }
+    .adv details{ margin-top: 10px; }
+  </style>
+</head>
+
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="./app.html">
+      <img src="../assets/logo.png" alt="LBI" class="brand-logo"/>
+      <span class="brand-name">LBI</span>
+    </a>
+
+    <div class="p-userbox">
+      <a class="btn2" href="./app.html">Voltar ao Painel</a>
+      <button class="btn2" id="btnNewTop">Novo</button>
+      <button class="btn2 primary" id="btnPresetTop">Criar template padrão LBI</button>
+    </div>
+  </div>
+</header>
+
+<section class="section bg-solid-1" style="min-height: calc(100vh - 68px); padding-top: 28px;">
+  <div class="p-wrap">
+    <div class="p-shell tpl-shell">
+
+      <!-- Lista -->
+      <aside class="card">
+        <div class="card-h">
+          <div>
+            <div class="kicker">Admin</div>
+            <h2 class="h1like">Templates de Draft</h2>
+            <div class="muted small">Modelos de Mapa + Civ por BO3/5/7</div>
+          </div>
+          <span class="p-pill"><span id="count">0</span>&nbsp;templates</span>
+        </div>
+        <div class="card-b">
+          <div class="field">
+            <label>Filtrar</label>
+            <input class="input" id="filter" type="text" placeholder="ex: PADRÃO, 2026, BO5..."/>
+          </div>
+
+          <div class="card" style="border-radius:16px; overflow:hidden;">
+            <div style="display:flex; gap:10px; padding:10px 12px; background: rgba(255,255,255,.05); font-weight:1000;">
+              <div style="flex:1">Template</div>
+              <div style="width:150px">Regras</div>
+              <div style="width:170px; text-align:right">Ações</div>
+            </div>
+            <div id="list" class="tpl-list"></div>
+          </div>
+
+          <div class="muted small" style="margin-top:10px">
+            Dica: localStorage é por origem (URL/porta). Se mudar a porta, seus templates não aparecem.
+          </div>
+        </div>
+      </aside>
+
+      <!-- Editor -->
+      <main class="card">
+        <div class="card-h">
+          <div>
+            <div class="kicker">Editor</div>
+            <h2 class="h1like">Configurar Template</h2>
+          </div>
+          <div class="pillrow">
+            <span class="p-pill">ID: <span id="idPreview" class="mono">—</span></span>
+            <select class="select" id="simBo" style="width:120px">
+              <option value="BO3">BO3</option>
+              <option value="BO5">BO5</option>
+              <option value="BO7">BO7</option>
+            </select>
+            <button class="btn2 sm" id="btnSimulate">Simular</button>
+          </div>
+        </div>
+
+        <div class="card-b">
+          <div class="row">
+            <div class="field">
+              <label>Nome</label>
+              <input class="input" id="name" type="text" placeholder="ex: LBI Padrão 2026"/>
+            </div>
+            <div class="field">
+              <label>ID (auto)</label>
+              <input class="input mono" id="id" type="text" readonly/>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:8px">
+            <div class="field">
+              <label>Mapas (1 por linha)</label>
+              <textarea class="textarea" id="maps" placeholder="Arabia\nLipany\n..."></textarea>
+            </div>
+            <div class="field">
+              <label>Civs (1 por linha)</label>
+              <textarea class="textarea" id="civs" placeholder="English\nFrench\n..."></textarea>
+            </div>
+          </div>
+
+          <div class="grid3" style="margin-top:8px">
+            <div class="field">
+              <label><input type="checkbox" id="mirrorAllowed"/> Permitir mirror (mesma civ pros 2)</label>
+              <div class="muted small">Se desligado, o sistema impede A e B de escolherem a mesma civ no mesmo game.</div>
+            </div>
+            <div class="field">
+              <label>Repetir mapa na série</label>
+              <select class="select" id="mapRepeat">
+                <option value="no">Não (recomendado)</option>
+                <option value="allow">Permitir</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Repetir civ na série</label>
+              <select class="select" id="civRepeat">
+                <option value="allow">Permitir (padrão AoE4)</option>
+                <option value="no">Não permitir</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <div class="card-h">
+              <div>
+                <div class="kicker">Configuração por BO</div>
+                <div class="muted small">Quantos bans por player e por jogo. O sistema gera o flow automaticamente.</div>
+              </div>
+              <span class="p-pill">MAP_BAN → MAP_PICK → DECIDER + CIV_BAN → CIV_PICK</span>
+            </div>
+            <div class="card-b">
+              <div class="grid3">
+                <div class="bo-card">
+                  <div class="bo-title">BO3</div>
+                  <div class="field">
+                    <label>Bans de mapa por player (pré-série)</label>
+                    <select class="select" id="bo3_mapBans">
+                      <option value="0">0</option><option value="1" selected>1</option><option value="2">2</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>Bans de civ por game (por player)</label>
+                    <select class="select" id="bo3_civBans">
+                      <option value="0" selected>0</option><option value="1">1</option><option value="2">2</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="bo-card">
+                  <div class="bo-title">BO5</div>
+                  <div class="field">
+                    <label>Bans de mapa por player (pré-série)</label>
+                    <select class="select" id="bo5_mapBans">
+                      <option value="0">0</option><option value="1" selected>1</option><option value="2">2</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>Bans de civ por game (por player)</label>
+                    <select class="select" id="bo5_civBans">
+                      <option value="0" selected>0</option><option value="1">1</option><option value="2">2</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="bo-card">
+                  <div class="bo-title">BO7</div>
+                  <div class="field">
+                    <label>Bans de mapa por player (pré-série)</label>
+                    <select class="select" id="bo7_mapBans">
+                      <option value="0">0</option><option value="1" selected>1</option><option value="2">2</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>Bans de civ por game (por player)</label>
+                    <select class="select" id="bo7_civBans">
+                      <option value="0" selected>0</option><option value="1">1</option><option value="2">2</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="adv" style="margin-top:12px">
+            <details>
+              <summary style="cursor:pointer; font-weight:1000;">Avançado: editar JSON manualmente (opcional)</summary>
+              <div class="muted small" style="margin:10px 0 8px 0">
+                Se você editar aqui, o JSON manual tem prioridade (mas você não precisa usar isso).
+              </div>
+              <div class="field">
+                <label>Config (JSON)</label>
+                <textarea class="textarea mono" id="json" style="min-height:130px"></textarea>
+                <div class="small" id="jsonStatus" style="margin-top:6px"></div>
+              </div>
+            </details>
+          </div>
+
+          <div class="pillrow" style="margin-top:12px; justify-content:space-between;">
+            <div class="pillrow">
+              <button class="btn2 primary" id="btnSave">Salvar</button>
+              <button class="btn2" id="btnCancel">Cancelar</button>
+            </div>
+            <div class="pillrow">
+              <button class="btn2" id="btnCopyId">Copiar ID</button>
+              <button class="btn2" id="btnCopyJson">Copiar JSON gerado</button>
+              <button class="btn2" style="border-color: rgba(255,77,77,.45); background: rgba(255,77,77,.10);" id="btnDelete">Excluir</button>
+            </div>
+          </div>
+
+          <div class="muted small" style="margin-top:10px">
+            O painel LBI lê os templates do localStorage: <span class="mono">lbi_draft_templates_v1</span>.
+          </div>
+        </div>
+      </main>
+
+    </div>
+  </div>
+</section>
+
+<script src="./draft-templates.js"></script>
+<script>
+  // só para botões do topo reaproveitarem os mesmos ids do JS
+  document.getElementById('btnNewTop')?.addEventListener('click', () => document.getElementById('btnNew')?.click());
+  document.getElementById('btnPresetTop')?.addEventListener('click', () => document.getElementById('btnPreset')?.click());
+</script>
+</body>
+</html>

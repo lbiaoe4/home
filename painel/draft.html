@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LBI • Draft</title>
+
+  <!-- Base layout (o mesmo do draft antigo) -->
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../theme-aoe4.css">
+
+  <!-- ajustes visuais do painel -->
+  <link rel="stylesheet" href="./painel.css">
+
+  <style>
+    .hidden{ display:none !important; }
+    .mt{ margin-top: 18px; }
+    .mt1{ margin-top: 10px; }
+    .mt2{ margin-top: 14px; }
+    .center{ text-align:center; }
+    .centerBox{ display:flex; justify-content:center; }
+    .bigId{ font-size: 22px; font-weight: 900; }
+    .whoLine{ margin-top: 6px; opacity: .85; }
+    .readyStatus{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-top: 14px; }
+    .readyItem{ padding:10px 12px; border:1px solid rgba(255,255,255,.12); border-radius: 14px; background: rgba(255,255,255,.04); }
+    .dot{ display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:8px; background: rgba(255,255,255,.35); }
+    .dot.green{ background: #22c55e; }
+    .dot.amber{ background: #f59e0b; }
+
+    .topLine{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-start; }
+    .pill{ padding:8px 12px; border-radius: 999px; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); }
+
+    .boards{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+    @media (max-width: 980px){ .boards{ grid-template-columns: 1fr; } }
+    .boardCard{ padding: 14px; border-radius: 18px; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); }
+    .boardHead{ font-weight: 900; letter-spacing: .2px; display:flex; align-items:center; gap:8px; }
+    .subHead{ margin-top: 10px; opacity: .85; font-size: 13px; }
+    .miniRow{ display:flex; gap: 8px; flex-wrap:wrap; margin-top: 8px; }
+    .miniPill{ padding: 8px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.15); font-size: 13px; }
+    .miniPill.ok{ border-color: rgba(34,197,94,.45); }
+    .miniPill.bad{ border-color: rgba(239,68,68,.45); }
+    .miniPill.muted{ opacity: .65; }
+
+    .instruction{ padding: 10px 14px; border-radius: 16px; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); font-weight: 700; }
+
+    .poolPanel{ margin-top: 16px; padding: 14px; border-radius: 18px; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); }
+    .poolTitleRow{ display:flex; justify-content:space-between; align-items:flex-end; gap:10px; flex-wrap:wrap; }
+    .poolGrid{ display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+    @media (max-width: 980px){ .poolGrid{ grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    .poolItem{ width: 100%; padding: 10px 10px; border-radius: 14px; border:1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.12); color: inherit; cursor:pointer; font-weight: 800; }
+    .poolItem:hover{ transform: translateY(-1px); }
+    .poolItem.disabled{ opacity: .45; cursor:not-allowed; transform:none; }
+
+    .summaryImg{ width:min(680px, 100%); border-radius: 14px; border:1px solid rgba(255,255,255,.12); }
+  </style>
+
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="./app.html">
+        <img src="../assets/logo.png" alt="LBI" class="brand-logo"/>
+        <span class="brand-name">LBI • Draft</span>
+      </a>
+
+      <div style="display:flex; gap:10px; align-items:center;">
+        <a class="btn2" id="btnBack" href="./app.html">Voltar ao Painel</a>
+        <button class="btn2" id="btnReset" type="button">Resetar</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- ROLE PICKER (fallback raro: só aparece se não der pra identificar automaticamente) -->
+    <section id="roleBox" class="panel mt hidden">
+      <div class="center">
+        <div class="bigId">Partida: <span id="roleRid" class="mono"></span></div>
+        <div class="whoLine muted">Não consegui identificar automaticamente seu lado nesta partida.
+          Selecione abaixo para continuar. <strong>A = maior seed (menor número)</strong>.</div>
+
+        <div class="readyStatus mt2">
+          <button id="btnRoleA" class="btn primary" type="button">Sou o Jogador #1 (A)</button>
+          <button id="btnRoleB" class="btn" type="button">Sou o Jogador #2 (B)</button>
+        </div>
+
+        <div class="mt2 muted">Dica: abrindo pelo Painel logado, isso acontece automaticamente.</div>
+      </div>
+    </section>
+
+    <!-- READY -->
+    <section id="readyBox" class="panel mt hidden">
+      <div class="center">
+        <div class="bigId">Partida: <span id="rid" class="mono"></span></div>
+        <div id="who" class="whoLine"></div>
+
+        <div class="readyStatus">
+          <div class="readyItem"><span class="dot green"></span> <strong>A</strong>: <strong id="rP1">—</strong></div>
+          <div class="readyItem"><span class="dot amber"></span> <strong>B</strong>: <strong id="rP2">—</strong></div>
+        </div>
+
+        <div class="mt2 muted">Seu nick</div>
+        <input id="playerName" placeholder="(auto)" maxlength="24" />
+        <div class="mt2 muted">Pressione quando estiver pronto</div>
+        <button id="readyBtn" class="btn primary mt2" type="button">PRONTO</button>
+
+        <div id="status" class="status muted mt2">Aguardando…</div>
+      </div>
+    </section>
+
+    <!-- DRAFT -->
+    <section id="draftBox" class="mt hidden">
+      <div class="topLine">
+        <div class="pill">ID: <strong class="mono" id="hdrId"></strong></div>
+        <div class="pill">Série: <strong id="hdrSeries"></strong></div>
+        <div class="pill">Etapa: <strong id="hdrStep"></strong></div>
+        <div class="pill" id="hdrTimer" style="display:none;">Tempo: <strong id="hdrTimerVal"></strong></div>
+      </div>
+
+      <div id="boardsBox" class="boards">
+        <div class="boardCard">
+          <div class="boardHead"><span class="dot green"></span> JOGADOR #1</div>
+          <div class="subHead">Selecionado:</div>
+          <div id="p1Sel" class="miniRow"></div>
+          <div class="subHead mt1">Banido / Sniped:</div>
+          <div id="p1Ban" class="miniRow"></div>
+        </div>
+
+        <div class="boardCard">
+          <div class="boardHead"><span class="dot amber"></span> JOGADOR #2</div>
+          <div class="subHead">Selecionado:</div>
+          <div id="p2Sel" class="miniRow"></div>
+          <div class="subHead mt1">Banido / Sniped:</div>
+          <div id="p2Ban" class="miniRow"></div>
+        </div>
+      </div>
+
+      <div class="centerBox mt">
+        <div id="instruction" class="instruction">—</div>
+      </div>
+
+      <!-- CONFIRM STEP -->
+      <div id="confirmBox" class="center mt hidden">
+        <div id="confirmText" class="muted">Etapa concluída. Clique OK para avançar.</div>
+        <button id="confirmBtn" class="btn primary mt2" type="button">OK</button>
+      </div>
+
+      <!-- POOL -->
+      <div class="poolPanel mt">
+        <div class="poolTitleRow">
+          <h2 id="poolTitle" class="h2">Pool</h2>
+          <div id="poolHint" class="muted small">—</div>
+        </div>
+        <div id="pool" class="poolGrid"></div>
+      </div>
+
+      <!-- SUMMARY IMAGE (opcional) -->
+      <div id="summaryBox" class="panel mt hidden">
+        <h2 class="h2">Resumo</h2>
+        <div class="center">
+          <img id="summaryImg" class="summaryImg" alt="Resumo" />
+          <div class="mt2">
+            <button id="downloadSummary" class="btn" type="button">Baixar imagem</button>
+          </div>
+        </div>
+        <canvas id="summaryCanvas" class="hidden" width="1400" height="1800"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="./draft.js"></script>
+</body>
+</html>

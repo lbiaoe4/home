@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>LBI • Login</title>
+
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../theme-aoe4.css">
+  <link rel="stylesheet" href="./painel.css">
+</head>
+
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="../index.html">
+      <img src="../assets/logo.png" alt="LBI" class="brand-logo"/>
+      <span class="brand-name">LBI</span>
+    </a>
+
+    <nav class="nav">
+      <a href="../index.html#calendario">Calendário</a>
+      <a href="../index.html#contato">Contato</a>
+    </nav>
+
+    <button class="nav-toggle" aria-label="Abrir menu"
+      onclick="document.body.classList.toggle('menu-open')">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <div class="mobile-menu">
+    <a href="../index.html#calendario" onclick="document.body.classList.remove('menu-open')">Calendário</a>
+    <a href="../index.html#contato" onclick="document.body.classList.remove('menu-open')">Contato</a>
+  </div>
+</header>
+
+<section class="section bg-solid-1" style="min-height: calc(100vh - 68px);">
+  <div class="p-wrap">
+    <div class="card" style="max-width: 520px; margin: 0 auto;">
+      <div class="card-h">
+        <div>
+          <div class="kicker">Painel</div>
+          <h1 class="h1like">Entrar na LBI</h1>
+        </div>
+        <span class="p-pill">LBI 2.0</span>
+      </div>
+
+      <div class="card-b">
+        <div class="field">
+          <label for="login">Login</label>
+          <input id="login" class="input" autocomplete="username" placeholder="seu login" />
+        </div>
+
+        <div class="field">
+          <label for="senha">Senha</label>
+          <input id="senha" type="password" class="input" autocomplete="current-password" placeholder="sua senha" />
+          <div class="muted small">A senha nunca é salva no navegador.</div>
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top: 6px;">
+          <button class="btn2 primary" id="btnLogin">Login</button>
+          <button class="btn2" id="btnCriar">Criar conta</button>
+        </div>
+
+        <div id="msg" class="muted small" style="margin-top: 12px;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="./app.js"></script>
+<script>
+  window.LBI_APP.bootLoginPage();
+</script>
+</body>
+</html>

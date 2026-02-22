@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LBI • Bracket</title>
+  <style>
+    :root{
+      --bg:#070a10;
+      --panel: rgba(20, 26, 36, .78);
+      --panel2: rgba(20, 26, 36, .62);
+      --stroke: rgba(255,255,255,.08);
+      --stroke2: rgba(255,255,255,.12);
+      --ink: rgba(245, 248, 255, .92);
+      --muted: rgba(245, 248, 255, .62);
+      --gold: #f5c84b;
+      --gold2: rgba(245,200,75,.35);
+      --line: rgba(245,200,75,.55);
+      --ok:#38d996;
+      --warn:#f5c84b;
+      --bad:#ff6b6b;
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --radius: 18px;
+      --radius2: 14px;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(900px 600px at 15% 0%, rgba(245,200,75,.06), transparent 60%),
+        radial-gradient(900px 600px at 85% 25%, rgba(96,165,250,.09), transparent 60%),
+        var(--bg);
+      min-height:100vh;
+    }
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      height:68px;
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 0 22px;
+      background: rgba(8, 12, 20, .75);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      font-weight: 900;
+      letter-spacing:.3px;
+    }
+    .dot{
+      width:8px; height:8px; border-radius:999px;
+      background: var(--gold);
+      box-shadow: 0 0 0 4px rgba(245,200,75,.12);
+    }
+    .actions{ display:flex; align-items:center; gap:10px; }
+    .btn{
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      color: var(--ink);
+      padding: 10px 14px;
+      border-radius: 999px;
+      cursor:pointer;
+      font-weight: 800;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      transition: .15s ease;
+      user-select:none;
+    }
+    .btn:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.16); }
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(245,200,75,.95), rgba(245,200,75,.72));
+      color: #1a1405;
+      border-color: rgba(245,200,75,.50);
+    }
+
+    .wrap{ padding: 26px 24px 34px; }
+    .card{
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 18px 18px 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      overflow:hidden;
+    }
+    .card::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: radial-gradient(650px 240px at 10% 0%, rgba(245,200,75,.10), transparent 60%);
+      pointer-events:none;
+    }
+    .card > *{ position:relative; }
+    .head{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:16px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+    .kicker{
+      font-size: 11px;
+      letter-spacing: 1.1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+    h1{
+      margin:0;
+      font-size: 20px;
+      line-height: 1.1;
+      letter-spacing:.2px;
+    }
+    .pill{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 12px;
+      gap:8px;
+    }
+    .pill.mvp{ border-color: rgba(245,200,75,.28); color: rgba(245,200,75,.92); background: rgba(245,200,75,.08); }
+
+    .filters{
+      display:grid;
+      grid-template-columns: 1.2fr 1.2fr 1fr auto;
+      gap: 12px;
+      align-items:end;
+      margin-bottom: 8px;
+    }
+    .field label{
+      display:block;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 800;
+      margin: 0 0 6px;
+    }
+    select{
+      width:100%;
+      border-radius: 14px;
+      padding: 12px 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(10, 14, 22, .55);
+      color: var(--ink);
+      outline:none;
+      font-weight: 800;
+    }
+
+    .hint{
+      margin: 8px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .cols-title{
+      display:grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 260px;
+      gap: 96px;
+      padding: 12px 10px 10px;
+      margin-top: 6px;
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+    .coltitle{
+      text-align:center;
+      color: rgba(245,200,75,.90);
+      font-weight: 900;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    .bracket-shell{
+      margin-top: 10px;
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 22px;
+      overflow:auto;
+      height: calc(100vh - 320px);
+      min-height: 520px;
+      position: relative;
+    }
+    .bracket-stage{
+      position: relative;
+      padding: 18px 20px;
+      min-width: 1000px;
+      min-height: 560px;
+    }
+
+    svg.lines{
+      position:absolute;
+      left:0; top:0;
+      width:100%;
+      height:100%;
+      pointer-events:none;
+      overflow: visible;
+    }
+
+    .match{
+      position:absolute;
+      width: 220px;
+      border-radius: 14px;
+      padding: 10px 10px 8px;
+      background: rgba(15, 20, 28, .68);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 18px 60px rgba(0,0,0,.40);
+      backdrop-filter: blur(10px);
+    }
+    .row{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+    }
+    .code{
+      font-weight: 900;
+      font-size: 11px;
+      color: rgba(245,200,75,.95);
+      letter-spacing:.4px;
+    }
+    .badge{
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-weight: 900;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
+      white-space:nowrap;
+    }
+    .b-ok{ border-color: rgba(56,217,150,.35); background: rgba(56,217,150,.12); color: rgba(56,217,150,.95); }
+    .b-warn{ border-color: rgba(245,200,75,.35); background: rgba(245,200,75,.12); color: rgba(245,200,75,.95); }
+    .b-bad{ border-color: rgba(255,107,107,.35); background: rgba(255,107,107,.12); color: rgba(255,107,107,.95); }
+    .name{
+      font-weight: 900;
+      font-size: 12px;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 150px;
+    }
+      .name.win{ color: rgba(34,197,94,.95); font-weight: 800; }
+      .name.lose{ color: rgba(239,68,68,.92); opacity:.95; }
+
+    .seed{
+      font-size: 11px;
+      font-weight: 900;
+      color: rgba(148,163,184,.95);
+    }
+    .small{
+      font-size: 11px;
+      color: rgba(245,248,255,.60);
+      font-weight: 800;
+    }
+    .meta{
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      display:flex; justify-content:space-between; gap:8px;
+    }
+
+    @media (max-width: 980px){
+      .filters{ grid-template-columns: 1fr; }
+      .bracket-shell{ height: calc(100vh - 360px); }
+      .cols-title{ gap: 48px; grid-auto-columns: 230px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="dot"></span> LBI • Bracket</div>
+    <div class="actions">
+      <button class="btn" id="btnBack">Voltar ao Painel</button>
+      <button class="btn primary" id="btnRefreshTop">Atualizar</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <div class="head">
+        <div>
+          <div class="kicker">Visualização</div>
+          <h1>Chave do Evento</h1>
+        </div>
+        <span class="pill mvp">MVP</span>
+      </div>
+
+      <div class="filters">
+        <div class="field">
+          <label>Evento</label>
+          <select id="evSelect"></select>
+        </div>
+
+        <div class="field">
+          <label>Mostrar</label>
+          <select id="modeSelect">
+            <option value="all">Mostrar tudo</option>
+            <option value="hide" selected>Ocultar BYE/Vazios (mantém jogos reais)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Auto atualizar</label>
+          <select id="autoSelect">
+            <option value="0">Desligado</option>
+            <option value="10">A cada 10s</option>
+            <option value="20" selected>A cada 20s</option>
+            <option value="30">A cada 30s</option>
+            <option value="60">A cada 60s</option>
+          </select>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:flex-end;">
+          <button class="btn primary" id="btnRender">Renderizar</button>
+        </div>
+      </div>
+
+      <div class="hint" id="hint">Carregando…</div>
+
+      <div class="cols-title" id="colsTitle" style="display:none"></div>
+
+      <div class="bracket-shell">
+        <div class="bracket-stage" id="stage">
+          <svg class="lines" id="lines"></svg>
+        </div>
+      </div>
+    </section>
+  </main>
+
+<script>
+(function(){
+  const LS_EVENTS = 'lbi_events';
+  const LS_MATCHES = 'lbi_matches';
+  const LS_USERS = 'lbi_users';
+
+  const $ = (id)=>document.getElementById(id);
+
+  function esc(s){
+    return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  }
+  function loadJSON(key, fallback){
+    try{ return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); }
+    catch{ return fallback; }
+  }
+
+  // ---------------------------
+  // USERS MAP (id -> nome exibido)
+  // ---------------------------
+  function buildUserMap(){
+    const users = loadJSON(LS_USERS, []);
+    const map = new Map();
+    for(const u of (Array.isArray(users) ? users : [])){
+      const id = u?.id;
+      if(!id) continue;
+      const full = u?.profile?.fullName;
+      const login = u?.login;
+      map.set(id, (full && String(full).trim()) ? String(full).trim() : (login ? String(login).trim() : id));
+    }
+    return map;
+  }
+  const USER_MAP = buildUserMap();
+  function userNameById(id){
+    if(!id) return '';
+    return USER_MAP.get(id) || '';
+  }
+
+  // ---------------------------
+  // NOME / SEED: resolver agressivo
+  // ---------------------------
+  function pickStr(v){
+    if(v == null) return '';
+    if(typeof v === 'string' || typeof v === 'number') return String(v);
+    if(typeof v === 'object'){
+      return (
+        v.name || v.nick || v.nickname || v.login || v.username || v.user || v.id || ''
+      ).toString();
+    }
+    return '';
+  }
+
+  function getSide(m, side){ // side: 'A'|'B'
+    const low = side.toLowerCase();
+    const cand = [
+      // common direct keys
+      m[low], m[side], m[side.toUpperCase?.() || side],
+      m[`A`], m[`B`],
+      // player/team variants
+      m[`player${side}`], m[`player_${low}`], m[`p${low}`], m[`p${side}`],
+      m[`team${side}`], m[`team_${low}`], m[`side${side}`], m[`side_${low}`],
+      // user/login/name variants
+      m[`user${side}`], m[`user_${low}`], m[`${low}User`],
+      m[`${low}Player`], m[`${low}Login`], m[`${low}_login`],
+      m[`player${side}Login`], m[`player${side}Name`],
+      m[`${low}Name`], m[`${low}_name`], m[`${low}Nick`], m[`${low}_nick`],
+      // sometimes stored as objects
+      m[`player${side}`] && (m[`player${side}`].name || m[`player${side}`].login || m[`player${side}`].nick),
+      m[low] && (m[low].name || m[low].login || m[low].nick),
+    ];
+    for (const v of cand){
+      if (!v) continue;
+      if (typeof v === 'string') return v;
+      if (typeof v === 'object'){
+        if (v.name) return v.name;
+        if (v.login) return v.login;
+        if (v.nick) return v.nick;
+        if (v.username) return v.username;
+      }
+    }
+
+    // fallback: schema atual usa participantAId/participantBId com ID do usuário
+    const idCand = [
+      m[`participant${side}Id`],
+      m[`player${side}Id`],
+      m[`user${side}Id`],
+      m[`${side.toLowerCase()}Id`],
+    ];
+    for(const id of idCand){
+      const nm = userNameById(id);
+      if(nm) return nm;
+    }
+    return '';
+  }
+
+  function getSeed(m, side){
+    const low = side.toLowerCase();
+    const cand = [
+      m[`${low}Seed`], m[`seed${side}`], m[`seed_${low}`],
+      m[`player${side}Seed`], m[`${low}_seed`]
+    ];
+    for(const v of cand){
+      const n = Number(v);
+      if(Number.isFinite(n) && n>0) return n;
+      const s = pickStr(v).trim();
+      const k = Number(s);
+      if(Number.isFinite(k) && k>0) return k;
+    }
+    return null;
+  }
+
+  function phaseOf(m){
+    const c = String(m.code || '').toUpperCase();
+    const p = c.split('-')[0];
+    if(/^R\\d+$/.test(p)) return p;
+    return String(m.round || m.phase || '').toUpperCase() || 'R?';
+  }
+  function idxOf(m){
+    const c = String(m.code || '');
+    const parts = c.split('-');
+    const n = Number(parts[1]);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function statusBadge(status){
+    const s = String(status||'').toLowerCase();
+    if(s.includes('valid')) return ['Validada','b-ok'];
+    if(s.includes('andamento')) return ['Em andamento','b-warn'];
+    if(s.includes('wo')) return ['WO','b-bad'];
+    if(s.includes('bye')) return ['BYE','b-warn'];
+    if(s.includes('vazio')) return ['Vazio',''];
+    if(s.includes('agend')) return ['Agendada',''];
+    return [status || '—',''];
+  }
+
+  function parseWhen(m){
+    const w = m.scheduledAt || m.when || m.datetime || m.dateTime || '';
+    return w ? String(w) : '';
+  }
+
+  function isByeOrEmpty(m){
+    const s = String(m.status||'').toLowerCase();
+    return s.includes('bye') || s.includes('vazio');
+  }
+
+  // Mostrar no modo "hide":
+  // - se tem A e B => mostra
+  // - se tem data/hora => mostra
+  // - se status relevante => mostra
+  // - se BYE/vazio puro => oculta
+  function displayable(m, mode){
+    if(mode==='all') return true;
+
+    const a = getSide(m,'A').trim();
+    const b = getSide(m,'B').trim();
+    const when = parseWhen(m).trim();
+    const st = String(m.status||'').toLowerCase();
+
+    if(a && b) return true;
+    if(when) return true;
+    if(st.includes('valid') || st.includes('andamento') || st.includes('agend')) return true;
+    if(isByeOrEmpty(m)) return false;
+    return !!(a || b);
+  }
+
+  const ORDER = ['R64','R32','R16','R8','R4','R2','R1'];
+  function phaseTitle(p){
+    if(p==='R64') return 'R64';
+    if(p==='R32') return 'R32';
+    if(p==='R16') return 'Oitavas';
+    if(p==='R8') return 'Quartas';
+    if(p==='R4') return 'Semis';
+    if(p==='R2') return 'Final';
+    return p;
+  }
+
+  function buildLayout(phases){
+    const colW = 260;
+    const baseGap = 96;
+    const left = 24;
+    const top = 18;
+
+    const coords = new Map();
+
+    const first = phases[0];
+    const firstArr = first.matches;
+    firstArr.forEach((m,i)=>{
+      coords.set(m.__id, { x: left + 0*colW, y: top + i*baseGap });
+    });
+
+    for(let pi=1; pi<phases.length; pi++){
+      const prev = phases[pi-1];
+      const cur = phases[pi];
+      cur.matches.forEach((m,i)=>{
+        const c1 = prev.matches[i*2] ? coords.get(prev.matches[i*2].__id) : null;
+        const c2 = prev.matches[i*2+1] ? coords.get(prev.matches[i*2+1].__id) : null;
+        let y;
+        if(c1 && c2) y = (c1.y + c2.y)/2;
+        else if(c1) y = c1.y;
+        else if(c2) y = c2.y;
+        else y = top + i*baseGap;
+        coords.set(m.__id, { x: left + pi*colW, y });
+      });
+    }
+
+    const width = left + phases.length*colW + 120;
+    const lastY = coords.get(firstArr[firstArr.length-1]?.__id)?.y ?? 560;
+    const height = Math.max(560, lastY + 180);
+
+    return { coords, width, height };
+  }
+
+  function renderBracket(eventId){
+    const events = loadJSON(LS_EVENTS, []);
+    const matchesAll = loadJSON(LS_MATCHES, []);
+
+    const ev = events.find(e=>e.id===eventId);
+    const mode = $('modeSelect').value;
+
+    const matches = matchesAll
+      .filter(m => m.eventId === eventId)
+      .map((m,idx)=>({ ...m, __id: m.id || (m.code + '::' + idx) }));
+
+    $('hint').textContent = ev
+      ? `${ev.title} • ${matches.length} partidas encontradas em ${LS_MATCHES}.`
+      : `Evento não encontrado. (${matches.length} partidas)`;
+
+    // agrupa por fase
+    const byPhase = new Map();
+    for(const m of matches){
+      const p = phaseOf(m);
+      if(!byPhase.has(p)) byPhase.set(p, []);
+      byPhase.get(p).push(m);
+    }
+
+    // fases completas (pra layout fixo)
+    const phasesAll = ORDER
+      .filter(p => byPhase.has(p))
+      .map(p => ({ phase:p, matches: byPhase.get(p).sort((a,b)=>idxOf(a)-idxOf(b)) }));
+
+    if(!phasesAll.length){
+      $('stage').innerHTML = '<div class="small" style="padding:22px;">Sem partidas para este evento.</div>';
+      return;
+    }
+
+    // 1) pré-filtra matches visíveis conforme o modo
+    const initialVisibleIds = new Set();
+    for (const ph of phasesAll){
+      for (const m of ph.matches){
+        if (mode === 'all') { initialVisibleIds.add(m.__id); continue; }
+        // regra dura: ocultando BYE/vazios, só mostra jogos com DOIS lados definidos
+        const a = getSide(m,'A'); const b = getSide(m,'B');
+        const byeEmpty = isByeOrEmpty(m);
+        if (byeEmpty && !(a && b)) continue;
+        if (displayable(m, mode)) initialVisibleIds.add(m.__id);
+      }
+    }
+
+    // 2) fases a renderizar (opção: esconder rodadas sem partidas visíveis)
+    let phasesRender = phasesAll.map(ph => ({
+      ...ph,
+      matches: ph.matches.filter(m => mode === 'all' ? true : initialVisibleIds.has(m.__id))
+    }));
+
+    if (mode !== 'all'){
+      phasesRender = phasesRender.filter(ph => ph.matches.length > 0);
+    }
+
+    // 3) ids visíveis finais (somente dentro das fases renderizadas)
+    const visibleIds = new Set();
+    for (const ph of phasesRender){
+      for (const m of ph.matches){
+        visibleIds.add(m.__id);
+      }
+    }
+
+    // cabeçalho das colunas
+    const titles = $('colsTitle');
+    titles.style.display = '';
+    titles.innerHTML = phasesRender.map(ph=>`<div class="coltitle">${esc(phaseTitle(ph.phase))}</div>`).join('');
+
+    // layout baseado no que está visível (colunas comprimem)
+const layout = buildLayout(phasesRender);
+
+    const stage = $('stage');
+    stage.style.width = layout.width + 'px';
+    stage.style.height = layout.height + 'px';
+
+    // limpa svg e cards
+    const svg = $('lines');
+    svg.innerHTML = '';
+    svg.setAttribute('viewBox', `0 0 ${layout.width} ${layout.height}`);
+    stage.querySelectorAll('.match').forEach(n=>n.remove());
+
+    // ---------------------------
+    // LINHAS: desenhar SÓ quando:
+    // - parent visível
+    // - child visível
+    // (assim linhas somem quando partida some)
+    // ---------------------------
+    for(let pi=1; pi<phasesAll.length; pi++){
+      const prev = phasesAll[pi-1];
+      const cur = phasesAll[pi];
+      cur.matches.forEach((m,i)=>{
+        if(!visibleIds.has(m.__id)) return;
+
+        const parent = layout.coords.get(m.__id);
+        const c1m = prev.matches[i*2];
+        const c2m = prev.matches[i*2+1];
+
+        const c1ok = c1m && visibleIds.has(c1m.__id);
+        const c2ok = c2m && visibleIds.has(c2m.__id);
+
+        const c1 = c1ok ? layout.coords.get(c1m.__id) : null;
+        const c2 = c2ok ? layout.coords.get(c2m.__id) : null;
+
+        if(!parent || (!c1 && !c2)) return;
+
+        const xMid = parent.x - 18;
+        const xFrom = (c1||c2).x + 220;
+
+        function path(fromY){
+          const y1 = fromY + 22;
+          const y2 = parent.y + 22;
+          return `M ${xFrom} ${y1} L ${xMid} ${y1} L ${xMid} ${y2} L ${parent.x} ${y2}`;
+        }
+
+        if(c1){
+          const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+          p.setAttribute('d', path(c1.y));
+          p.setAttribute('fill','none');
+          p.setAttribute('stroke','var(--line)');
+          p.setAttribute('stroke-width','2');
+          p.setAttribute('opacity','0.85');
+          svg.appendChild(p);
+        }
+        if(c2){
+          const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+          p.setAttribute('d', path(c2.y));
+          p.setAttribute('fill','none');
+          p.setAttribute('stroke','var(--line)');
+          p.setAttribute('stroke-width','2');
+          p.setAttribute('opacity','0.85');
+          svg.appendChild(p);
+        }
+      });
+    }
+
+    // cards (somente visíveis)
+    for(const m of matches){
+      if(!visibleIds.has(m.__id)) continue;
+
+      const pos = layout.coords.get(m.__id);
+      if(!pos) continue;
+
+      const a = getSide(m,'A').trim() || '—';
+      const b = getSide(m,'B').trim() || '—';
+      const as = getSeed(m,'A');
+      const bs = getSeed(m,'B');
+
+      const winA = !!(m.winnerId && m.participantAId && m.winnerId === m.participantAId);
+      const winB = !!(m.winnerId && m.participantBId && m.winnerId === m.participantBId);
+
+      const md = (m.md || m.format || '').toString();
+      const scoreA = (m.scoreA ?? m.aScore ?? 0);
+      const scoreB = (m.scoreB ?? m.bScore ?? 0);
+      const when = parseWhen(m);
+
+      const [label, cls] = statusBadge(m.status);
+      const badgeCls = cls ? `badge ${cls}` : 'badge';
+
+      const div = document.createElement('div');
+      div.className = 'match';
+      div.style.left = pos.x + 'px';
+      div.style.top = pos.y + 'px';
+      div.innerHTML = `
+        <div class="row">
+          <div class="code">${esc(m.code || '')}</div>
+          <div class="${badgeCls}">${esc(label)}</div>
+        </div>
+
+        <div class="row" style="margin-top:8px;">
+          <div class="name ${winA?'win':(winB?'lose':'')}">${esc(a)}</div>
+          <div class="seed">${as ? '#' + esc(as) : ''}</div>
+          <div style="font-weight:900;">${esc(scoreA)}-${esc(scoreB)}</div>
+        </div>
+
+        <div class="row" style="margin-top:6px;">
+          <div class="name ${winB?'win':(winA?'lose':'')}">${esc(b)}</div>
+          <div class="seed">${bs ? '#' + esc(bs) : ''}</div>
+          <div class="small">${md ? esc(md) : ''}</div>
+        </div>
+
+        <div class="meta">
+          <div class="small">${when ? 'Quando: ' + esc(when) : ''}</div>
+        </div>
+      `;
+      stage.appendChild(div);
+    }
+
+    // scroll inicial
+    const shell = document.querySelector('.bracket-shell');
+    if(shell && shell.scrollLeft === 0){
+      shell.scrollLeft = Math.max(0, layout.width/3 - shell.clientWidth/2);
+    }
+  }
+
+  function fillEvents(){
+    const events = loadJSON(LS_EVENTS, []);
+    const sel = $('evSelect');
+    sel.innerHTML = events.length
+      ? events.map(e=>`<option value="${esc(e.id)}">${esc(e.title || e.id)}</option>`).join('')
+      : `<option value="">(Nenhum evento)</option>`;
+
+    const url = new URL(location.href);
+    const qid = url.searchParams.get('eventId');
+    if(qid && events.some(e=>e.id===qid)) sel.value = qid;
+
+    return sel.value;
+  }
+
+  let timer = null;
+  function setAuto(){
+    if(timer) clearInterval(timer);
+    const s = Number($('autoSelect').value || 0);
+    if(s>0){
+      timer = setInterval(()=> $('btnRender').click(), s*1000);
+    }
+  }
+
+  $('btnBack').addEventListener('click', ()=> location.href = './app.html');
+  $('btnRefreshTop').addEventListener('click', ()=> $('btnRender').click());
+  $('btnRender').addEventListener('click', ()=>{
+    const id = $('evSelect').value;
+    if(!id){
+      $('hint').textContent = 'Nenhum evento para renderizar.';
+      return;
+    }
+    renderBracket(id);
+  });
+  $('autoSelect').addEventListener('change', setAuto);
+
+  const firstId = fillEvents();
+  $('hint').textContent = 'Selecione um evento e clique em Renderizar.';
+  if(firstId) renderBracket(firstId);
+  setAuto();
+
+})();
+</script>
+</body>
+</html>
